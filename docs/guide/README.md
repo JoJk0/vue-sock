@@ -1,0 +1,1 @@
+VueSock is a Vue wrapper for GreenSock Animation Platform (GSAP)
