@@ -2,8 +2,9 @@
   <a href="https://pinia.vuejs.org" target="_blank" rel="noopener noreferrer">
     <img width="180" src="docs/.vuepress/public/logo.svg" alt="VueSock logo">
   </a>
-  <p align="center" style="font-size: 3em; font-weight: bold; margin: 0;">VueSock</p>
-  <p align="center" style="font-size: 1.5em; margin: 0;margin-bottom: 2rem;">A GreenSock for Vue</p>
+  <h1 align="center">VueSock</h1>
+  <h3 align="center">A GreenSock for Vue</h3>
+  <p>.</p>
 </p>
 
 Vue wrapper for GreenSock Animation Platform (GSAP)
@@ -42,6 +43,8 @@ The roadmap is published on
 
 Once implemented, [Netlify](https://www.netlify.com/) is expected to be used for deployment and the docs will be plugged into [Algolia](https://www.algolia.com/) search engine.
 
-## 💖 Sponsoring
+## 💖 Funding
 
-Sponsoring will be set up shortly on [PayPal](https://paypal.com) and [GitHub Sponsors](https://github.com/sponsors/).
+Help support my open-source work through [PayPal](https://paypal.com) and [GitHub Sponsors](https://github.com/sponsors/JoJk0?o=esb).
+
+<a href="https://www.paypal.com/donate/?hosted_button_id=MVYGX9EHYRN9W"><img src="https://pics.paypal.com/00/s/YTRmYmIzYjgtNDA5My00YzY5LWJmN2QtNmMyNTU2ZGUwOTYw/file.PNG" border="0" height="35" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" /></a>
