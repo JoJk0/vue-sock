@@ -6,8 +6,8 @@ actions:
   - text: Get Started
     link: /guide/getting-started.html
     type: primary
-  - text: Introduction
-    link: /guide/
+  - text: API Reference
+    link: /api/component
     type: secondary
 features:
   - title: In-template tweens

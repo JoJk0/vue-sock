@@ -10,7 +10,7 @@ const resolvePath = (str: string) => path.resolve(__dirname, str)
 export default defineConfig({
   resolve: {
     alias: {
-      '~/': resolvePath('src'),
+      '@/': resolvePath('src'),
     },
   },
   plugins: [

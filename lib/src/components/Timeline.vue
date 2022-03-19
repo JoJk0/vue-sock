@@ -5,7 +5,6 @@
 import type { PropType } from 'vue'
 import { onMounted, useSlots } from 'vue'
 import gsap from 'gsap'
-import type ScrollTrigger from 'gsap/ScrollTrigger'
 
 const props = defineProps({
   start: {
