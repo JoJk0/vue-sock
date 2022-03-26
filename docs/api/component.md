@@ -66,3 +66,5 @@ Returns `gsap.core.Tween`
 
 ## `<Timeline />`
 ## `<ScrollTrigger />`
+## `<Controls />`
+## `<Snap />`

@@ -1,45 +1,156 @@
 <template>
-  <slot />
+  <div :class="config.timelineClassName" ref="targetsContainerEl">
+   <component v-for="vNode of targetsVNodes" :key="vNode.toString()" :paused="true" :is="vNode" @ready="onTargetReady($event)"/>
+  </div>
 </template>
 <script lang="ts" setup>
-import type { PropType } from 'vue'
+import { computed, onUnmounted, ref } from 'vue'
 import { onMounted, useSlots } from 'vue'
 import gsap from 'gsap'
+import { TimelineEmits, TimelineProps } from '@/types';
+import { config } from '../utils';
 
 const props = defineProps({
-  start: {
-    type: [String, Number, Function] as PropType<ScrollTrigger.Vars['start']>,
-    default: null,
-  },
-  end: {
-    type: [String, Number, Function] as PropType<ScrollTrigger.Vars['end']>,
-    default: null,
-  },
-  scrub: {
-    type: [Number, Boolean] as PropType<ScrollTrigger.Vars['scrub']>,
-    default: null,
-  },
-  markers: {
-    type: [Boolean, Object] as PropType<ScrollTrigger.Vars['markers']>,
+  autoRemoveChildren: {
+    type: Boolean,
     default: false,
   },
-})
+  callbackScope: {
+    type: Object,
+    default: undefined,
+  },
+  delay: {
+    type: Number,
+    default: 0,
+  },
+  paused: {
+    type: Boolean,
+    default: false,
+  },
+  repeat: {
+    type: Number,
+    default: 0,
+  },
+  repeatDelay: {
+    type: Number,
+    default: 0,
+  },
+  repeatRefresh: {
+    type: Boolean,
+    default: false,
+  },
+  smoothChildTiming: {
+    type: Boolean,
+    default: undefined,
+  },
+  yoyo: {
+    type: Boolean,
+    default: false,
+  },
+  position: {
+    type: [Number, String],
+    default: undefined,
+  },
+  tween: {
+    type: Object,
+    default: undefined,
+  },
+  tweens: {
+    type: Array,
+    default: undefined,
+  },
+  timeline: {
+    type: Object,
+    default: undefined,
+  },
+  timelines: {
+    type: Array,
+    default: undefined,
+  },
+  scrollTrigger: {
+    type: Object,
+    default: undefined,
+  },
+} as TimelineProps)
+
+const emit = defineEmits({
+  complete: e => e,
+  interrupt: e => e,
+  repeat: e => e,
+  reverseComplete: e => e,
+  start: e => e,
+  update: e => e,
+
+  // progressChange: Number,
+  pausedChange: Boolean,
+  reversedChange: Boolean,
+  ready: e => e,
+  destroyed: e => e,
+} as TimelineEmits)
 
 const slots = useSlots()
 
+const timeline = ref<gsap.core.Timeline>(gsap.timeline({
+      autoRemoveChildren: props.autoRemoveChildren,
+      callbackScope: props.callbackScope,
+      delay: props.delay,
+      paused: true,
+      repeat: props.repeat,
+      repeatDelay: props.repeatDelay,
+      repeatRefresh: props.repeatRefresh,
+      smoothChildTiming: props.smoothChildTiming,
+      yoyo: props.yoyo,
+      scrollTrigger: props.scrollTrigger
+    }))
+
+// const childrenRefs = ref<(gsap.core.Timeline | gsap.core.Tween)[]>([])
+
+const targetsVNodes = computed(() => slots.default ? slots.default() : [])
+
+const targetsContainerEl = ref<Element>()
+
+// const targets = computed(() => targetsContainerEl.value ? Array.from(targetsContainerEl.value.children).filter(el => el.className === config.tweenClassName || el.className === config.timelineClassName) : [])
+
+const onTargetReady = ({el, position}: {el: gsap.core.Timeline | gsap.core.Tween, position?: gsap.Position}) => {
+
+  if(!timeline.value) return;
+  timeline.value.add(el.paused(false), position)
+
+  if(timeline.value.getChildren().length === targetsVNodes.value.length && !props.paused){
+    timeline.value.play()
+  }
+
+}
+
+// const onDestroyed = (el: gsap.core.Timeline | gsap.core.Tween) => {
+//   const index = timeline.value?.getChildren().indexOf(el)
+//   if(index !== -1){
+//     timeline.value?.remove(el)
+//   }
+// }
+
+defineExpose({timeline})
+
 onMounted(() => {
-  const slotEls = slots.default ? slots.default().map(slot => slot.el) : null
+  if(!props.paused) timeline.value.play()
+  if (targetsContainerEl.value) {
 
-  if (slotEls && slotEls.length) {
-    const { start, end, scrub, markers } = props
+    emit('ready', {el: timeline.value, position: props.position})
 
-    const scrollTrigger = {
-      ...props,
-    }
+    timeline.value.eventCallback('onComplete', () => emit('complete', timeline.value))
+    timeline.value.eventCallback('onRepeat', () => emit('repeat', timeline.value))
+    timeline.value.eventCallback('onReverseComplete', () => emit('reverseComplete', timeline.value))
+    timeline.value.eventCallback('onStart', () => emit('start', timeline.value))
+    timeline.value.eventCallback('onUpdate', () => emit('update', timeline.value))
+    timeline.value.eventCallback('onInterrupt', () => emit('interrupt', timeline.value))
   }
   else {
-    console.error('vue-sock: ScrollTrigger: No content found')
+    console.error('vue-sock: Timeline: No content found')
   }
+})
+
+onUnmounted(() => {
+  if (timeline.value){ emit('destroyed', timeline.value); timeline.value.kill(); timeline.value = undefined }
 })
 
 </script>

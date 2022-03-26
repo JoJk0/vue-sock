@@ -1,25 +1,28 @@
 <p align="center" style="margin: 4rem">
-  <a href="https://pinia.vuejs.org" target="_blank" rel="noopener noreferrer">
+  <a href="https://github.com/" target="_blank" rel="noopener noreferrer">
     <img width="180" src="docs/.vuepress/public/logo.svg" alt="VueSock logo">
   </a>
   <h1 align="center">VueSock</h1>
   <h3 align="center">A GreenSock for Vue</h3>
-  <p>.</p>
+  <h3 align="center"><b><s>Guide</s> (under construction) • <s>Examples</s> • <s>API Reference</s></b></h3>
 </p>
 
 Vue wrapper for GreenSock Animation Platform (GSAP)
 
-- **🧮 In-template tweens** <br />
+- **🧮  In-template tweens** <br />
   Use GSAP components in your template
 
-- **✨ Reactive animations** <br />
+- **✨  Reactive animations** <br />
   Don't worry about updating animations manually
 
-- **🎼 Composition API** <br />
+- **🎼  Composition API** <br />
   Use composables if you prefer more programmatic approach
 
+- **✅  Complete** <br />
+  Access all properties and methods without limitations - no more ditching the library as your project grows!
+
 > 
-> **This project is in very early stage of development and is not fit for production use**
+> ## **This project is in very early stage of development and is not fit for production use**
 > 
 
 ## 📦 Installation
@@ -35,6 +38,47 @@ $ yarn add gsap vue-sock
 // or with pnpm
 $ pnpm add gsap vue-sock
 ```
+
+Make sure you don't forget about `vue`!
+
+## 👉 Basic usage
+You can either use components, or composable functions to build your animations, depending on your preference, or use cases. You can use components in Options API and Composition API, and composables in Composition API only.
+
+### Components
+```vue
+<template>
+  <Tween :from="{ opacity: 0, xPercent: -20 }" :to="{ opacity: 1, xPercent: 0 }" :duration="2">
+    <div class="box">Hello VueSock!</div>
+  </Tween>
+</template>
+
+<script setup>
+import {
+  Tween
+} from 'vue-sock'
+</script>
+```
+
+### Composables
+```vue
+<template>
+  <div ref="helloVueSockEl">
+    Hello VueSock!
+  </div>
+</template>
+
+<script setup>
+  import { useTween } from 'vue-sock'
+
+  const [[ helloVueSockEl ]] = useTween({ 
+    from: { opacity: 0 }, 
+    to: { opacity: 1 },
+    controls: true
+  })
+</script>
+```
+
+For more examples, see **~~Docs~~ (under construction)**
 
 ## 🗺 Development progress
 The roadmap is published on 

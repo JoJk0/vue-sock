@@ -1,35 +1,62 @@
-import { TweenEvents, TweenOptions } from '@/types';
+import { TweenEvents, TweenOptions, TweenRefs, UseTweenActions, UseTweenReturn } from '@/types';
 import { methods, warnTweenNotFound } from '../utils';
 import gsap from 'gsap'
-import { computed, onMounted, Ref, ref } from 'vue'
+import { computed, ComputedRef, onMounted, Ref, ref, toRefs } from 'vue'
+import { Tween } from '..';
 
 /** GSAP Tween composable function
  * @param options - tween options
  */
-export const useTween = (options: TweenOptions) => {
+
+export function useTween(options: TweenOptions): UseTweenReturn<'targetRefs'>
+export function useTween(options: TweenOptions, targets: HTMLElement[]): UseTweenReturn<'actionsOnly'>
+export function useTween(tweenComponent: typeof Tween): UseTweenReturn<'actionsOnly'>
+// export function useTween(): UseTweenReturn<'targetRef'>
+
+export function useTween(arg1: TweenOptions | typeof Tween, arg2?: HTMLElement[]) {
     // const refEl = ref<HTMLElement>()
+    if (typeof arg1 !== 'object') { console.error('VueSock: invalid arguments - must be either Tween component instance, or TweenOptions'); return };
 
-    const targets = [100].map(i => ref<HTMLElement>());
+    const isComponent = arg1 && typeof (arg1 as any)?.render === 'function'
 
-    const tween = ref<gsap.core.Tween>()
-    
+    const isTweenOptions = !isComponent && (!!arg1.from || !!arg1.to)
+
+    const options = (isComponent ? (arg1 as typeof Tween).props : isTweenOptions ? arg1 : undefined) as TweenOptions | undefined
+    if (!options) {
+        console.error('VueSock: invalid arguments - must be either Tween component instance, or TweenOptions');
+        return
+    }
+
+    const targets = isComponent ? ((arg1 as typeof Tween).targets as ComputedRef<HTMLElement[]>).value.map(target => ref(target)) : arg2 ? toRefs(arg2) : isTweenOptions ? [100].map(i => ref<HTMLElement>()) : undefined;
+    if (!targets) {
+        console.error('VueSock: invalid arguments - must be either Tween component instance, or TweenOptions');
+        return
+    }
+
+    const tween = isComponent ? (arg1 as typeof Tween).tween as Ref<gsap.core.Tween | undefined> : ref<gsap.core.Tween>()
+
     onMounted(() => {
-        if (!targets[0].value) return;
+        if (!targets[0].value) {
+            console.error('VueSock: No targets provided');
+            return
+        };
 
         const els = (targets.filter(el => !!el.value) as Ref<HTMLElement>[]).map(target => target.value)
+
+        if (tween.value) return;
 
         if (options.from && options.to) {
             tween.value = gsap.fromTo(els, options.from, options.to)
         } else if (options.from) {
             tween.value = gsap.from(els, options.from)
-        } else if(options.to) {
+        } else if (options.to) {
             tween.value = gsap.to(els, options.to)
         } else {
             tween.value = gsap.set(els, options)
         }
     })
 
-    const refs = {
+    const refs: TweenRefs = {
         progress: computed({
             get: () => tween.value?.progress(),
             set: (v) => v ? tween.value?.progress(v) : undefined
@@ -133,9 +160,13 @@ export const useTween = (options: TweenOptions) => {
     const actions = {
         tween,
         ...events,
-        ...methods(tween.value!),
+        // ...methods(tween.value!),
         ...refs
-    };
+    } as UseTweenActions;
 
-    return [targets, actions] as const
+    if (isComponent || arg2) {
+        return actions as UseTweenReturn<'actionsOnly'>
+    } else {
+        return [targets, actions] as UseTweenReturn<'targetRefs'>
+    }
 }

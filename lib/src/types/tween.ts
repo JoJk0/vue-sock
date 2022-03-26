@@ -1,4 +1,6 @@
-import { PropType } from 'vue';
+import { ComputedRef, PropType, Ref, WritableComputedRef } from 'vue';
+import { EmitKeys, ScrollTriggerTweenTimelineOptions } from '.';
+import { TimelineTweenOptions } from './timeline';
 
 export type TweenOptions = {
 
@@ -73,30 +75,98 @@ export type TweenOptions = {
 
     /** If `true`, every other repeat iteration will run in the opposite direction so that the tween appears to go back and forth. This has no affect on the reversed property though. So if `repeat` is `2` and `yoyo` is `false`, it will look like: `start - 1 - 2 - 3 - 1 - 2 - 3 - 1 - 2 - 3 - end`. But if yoyo is true, it will look like: `start - 1 - 2 - 3 - 3 - 2 - 1 - 1 - 2 - 3 - end`. Default: `false`. */
     yoyo?: gsap.TweenVars['yoyo'];
-}
+
+} & TimelineTweenOptions & ScrollTriggerTweenTimelineOptions
+
+export type TweenTargetString = `.${string}` | `#${string}`
+export type TweenTarget = (Element | TweenTargetString)
+export type TweenTargets = TweenTarget[]
 
 export type TweenProps = {
     [P in keyof Required<TweenOptions>]: {
         type: PropType<TweenOptions[P]>,
         default: TweenOptions[P]
     }
-}
+} & {
+    target: {
+        type: PropType<TweenTarget>,
+        default: TweenTarget | undefined
+    },
+    targets: {
+        type: PropType<TweenTargets>,
+        default: TweenTargets | undefined
+    }
+} & TweenState
 
 export type TweenMethods = {}
 
-export type TweenRefs = {}
+export type TweenRefs = {
+    progress: WritableComputedRef<number | undefined>,
+    yoyo: WritableComputedRef<boolean | undefined>,
+    totalTime: WritableComputedRef<number | undefined>,
+    totalProgress: WritableComputedRef<number | undefined>,
+    totalDuration: WritableComputedRef<number | undefined>,
+    timeScale: WritableComputedRef<number | undefined>,
+    time: WritableComputedRef<number | undefined>,
+    startTime: WritableComputedRef<number | undefined>,
+    reversed: WritableComputedRef<boolean | undefined>,
+    repeatDelay: WritableComputedRef<number | undefined>,
+    repeat: WritableComputedRef<number | undefined>,
+    paused: WritableComputedRef<boolean | undefined>,
+    iteration: WritableComputedRef<number | undefined>,
+    duration: WritableComputedRef<number | undefined>,
+    delay: WritableComputedRef<number | undefined>,
+    isActive: ComputedRef<boolean | undefined>,
+}
 
-export type TweenCallbackType = gsap.CallbackType extends `on${infer U}` ? Uncapitalize<U> : never
+
 
 export type TweenEvents = {
     [P in gsap.CallbackType]: (hook: (tween: gsap.core.Tween) => void) => void
 }
 
 export type TweenEmits = {
-    [P in TweenCallbackType]: (tween: gsap.core.Tween) => gsap.core.Tween
+    [P in EmitKeys<gsap.CallbackType>]: (tween: gsap.core.Tween) => gsap.core.Tween
+} & TweenInternalEmits;
+
+export type TweenInternalEmits = {
+    // progressChange: (e: number) => number,
+    pausedChange: (e: boolean) => boolean,
+    reversedChange: (e: boolean) => boolean,
+    ready: (e: { el: gsap.core.Tween, position?: gsap.Position }) => { el: gsap.core.Tween, position?: gsap.Position },
+    destroyed: (e: gsap.core.Tween) => gsap.core.Tween,
 }
 
-export type TimelineTweenOptions = TweenOptions & {
-    /** Target refs */
-    target?: string | string[];
+export type UseTweenActions = {
+    tween: Ref<gsap.core.Tween>,
+} & TweenEvents & TweenRefs
+
+export type UseTweenReturnType = 'targetRefs' | 'actionsOnly'
+
+export type UseTweenReturn<T extends UseTweenReturnType> = T extends 'targetRefs' ? [
+    Ref<HTMLElement | undefined>[],
+    UseTweenActions
+] : T extends 'actionsOnly' ? UseTweenActions : never
+
+export type TweenState = {
+    // progress: WritableComputedRef<number | undefined>,
+    // yoyo: WritableComputedRef<boolean | undefined>,
+    // totalTime: WritableComputedRef<number | undefined>,
+    // totalProgress: WritableComputedRef<number | undefined>,
+    // totalDuration: WritableComputedRef<number | undefined>,
+    // timeScale: WritableComputedRef<number | undefined>,
+    // time: WritableComputedRef<number | undefined>,
+    // startTime: WritableComputedRef<number | undefined>,
+    // reversed: WritableComputedRef<boolean | undefined>,
+    // repeatDelay: WritableComputedRef<number | undefined>,
+    // repeat: WritableComputedRef<number | undefined>,
+    // paused: WritableComputedRef<boolean | undefined>,
+    // iteration: WritableComputedRef<number | undefined>,
+    // isActive: ComputedRef<boolean | undefined>,
+    // duration: WritableComputedRef<number | undefined>,
+    // delay: WritableComputedRef<number | undefined>,
+    progress: {
+        type: NumberConstructor,
+        default: number
+    }
 }

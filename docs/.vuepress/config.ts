@@ -91,6 +91,12 @@ export default defineUserConfig<DefaultThemeOptions>({
             '@vuepress/register-components',
             {
                 componentsDir: resolvePath('./components'),
+                componentsPatterns: ['**/*.vue'],
+                components: {
+                    BasicUsageComponent: resolvePath('./components/guide/getting-started/BasicUsageComponent.vue'),
+                    BasicUsageComposition: resolvePath('./components/guide/getting-started/BasicUsageComposition.vue'),
+                    OptionsAPI: resolvePath('./components/guide/getting-started/OptionsAPI.vue'),
+                }
             },
         ]
     ],

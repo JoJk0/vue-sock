@@ -1,6 +1,6 @@
 {
   "name": "vue-sock",
-  "version": "0.0.1-dev",
+  "version": "0.0.2-dev",
   "description": "Vue wrapper for GreenSock Animation Platform (GSAP)",
   "types": "./dist/src/index.d.ts",
   "scripts": {
@@ -26,12 +26,12 @@
   "license": "MIT",
   "funding": [
     {
-      "type": "patreon",
-      "url": ""
+      "type": "github",
+      "url": "https://github.com/sponsors/JoJk0"
     },
     {
-      "type": "individual",
-      "url": ""
+      "type": "paypal",
+      "url": "https://www.paypal.com/donate/?hosted_button_id=MVYGX9EHYRN9W"
     }
   ],
   "keywords": [
@@ -42,7 +42,7 @@
     "url": "https://github.com/JoJk0/vue-sock/issues"
   },
   "homepage": "https://github.com/JoJk0/vue-sock#readme",
-  "dependencies": {
+  "peerDependencies": {
     "gsap": "^3.9.1",
     "vue": "^3.2.31"
   },
@@ -52,10 +52,13 @@
     "@vue/compiler-sfc": "^3.1.5",
     "@vue/test-utils": "^2.0.0-rc.18",
     "eslint": "^8.10.0",
+    "gsap": "^3.9.1",
     "jsdom": "^19.0.0",
+    "sass": "^1.49.9",
     "typescript": "^4.6.2",
     "vite": "^2.8.6",
     "vite-plugin-dts": "^0.9.10",
-    "vitest": "^0.6.0"
+    "vitest": "^0.6.0",
+    "vue": "^3.2.31"
   }
 }

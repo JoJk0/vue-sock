@@ -268,6 +268,8 @@ By default, GSAP plays tweens automatically once the DOM is loaded. To prevent t
   </CodeGroupItem>
 </CodeGroup>
 
+## Access to methods
+
 ## Multiple targets
 <CodeGroup>
   <CodeGroupItem title="Component API">
