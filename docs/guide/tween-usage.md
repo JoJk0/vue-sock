@@ -1,4 +1,4 @@
-# Usage of tweens
+# Tweens
 
 ## From
 <CodeGroup>

@@ -1,4 +1,4 @@
-# Usage of ScrollTrigger
+# ScrollTrigger
 
 ## ScrollTrigger - basic usage
 

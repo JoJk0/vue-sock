@@ -1,5 +1,5 @@
 import { ComputedRef, PropType, Ref, WritableComputedRef } from 'vue';
-import { EmitKeys, ScrollTriggerTweenTimelineOptions } from '.';
+import { EmitKeys, Propify, ScrollTriggerTweenTimelineOptions } from '.';
 import { TimelineTweenOptions } from './timeline';
 
 export type TweenOptions = {
@@ -82,12 +82,7 @@ export type TweenTargetString = `.${string}` | `#${string}`
 export type TweenTarget = (Element | TweenTargetString)
 export type TweenTargets = TweenTarget[]
 
-export type TweenProps = {
-    [P in keyof Required<TweenOptions>]: {
-        type: PropType<TweenOptions[P]>,
-        default: TweenOptions[P]
-    }
-} & {
+export type TweenProps = Propify<TweenOptions> & {
     target: {
         type: PropType<TweenTarget>,
         default: TweenTarget | undefined

@@ -5,7 +5,17 @@
   <h1 align="center">VueSock</h1>
   <h3 align="center">A GreenSock for Vue</h3>
   <h3 align="center"><b><s>Guide</s> (under construction) • <s>Examples</s> • <s>API Reference</s></b></h3>
+  <h3 align="center">
+    <a href="https://www.npmjs.com/package/vue-sock">
+      <img src="https://img.shields.io/npm/v/vue-sock?style=flat-square" alt="version" />
+    </a>
+    <a href="https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/README.md">
+      <img src="https://raw.githubusercontent.com/JoJk0/StandWithUkraine/patch-1/badges/StandWithUkraineFlat.svg" alt="version" />
+    </a>
+  </h3>
 </p>
+
+[![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://vshymanskyy.github.io/StandWithUkraine/)
 
 Vue wrapper for GreenSock Animation Platform (GSAP)
 

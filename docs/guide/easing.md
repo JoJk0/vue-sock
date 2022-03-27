@@ -1,1 +1,3 @@
 # Easing
+
+## Defining eases

@@ -49,7 +49,7 @@ export default defineUserConfig<DefaultThemeOptions>({
         navbar: [
             { text: 'Home', link: '/' },
             { text: 'Guide', link: '/guide/' },
-            { text: 'API Reference', link: '/api/component/' },
+            { text: 'API Reference', link: '/api/components/' },
             { text: 'Examples', link: '/examples/' },
         ],
         sidebar: {
@@ -62,6 +62,9 @@ export default defineUserConfig<DefaultThemeOptions>({
                         '/guide/tween-usage.md',
                         '/guide/timeline-usage.md',
                         '/guide/scrolltrigger-usage.md',
+                        '/guide/effects.md',
+                        '/guide/easing.md',
+                        '/guide/low-level-access.md',
                         '/guide/controls.md',
                     ],
                 },
@@ -78,8 +81,9 @@ export default defineUserConfig<DefaultThemeOptions>({
                 {
                     text: 'API reference',
                     children: [
-                        '/api/component.md',
-                        '/api/composition.md',
+                        '/api/components.md',
+                        '/api/composables.md',
+                        '/api/helpers.md',
                     ],
                 },
             ],

@@ -1,4 +1,4 @@
-# Component API
+# Components
 ## `<Tween />`
 ### Props
 
@@ -68,3 +68,4 @@ Returns `gsap.core.Tween`
 ## `<ScrollTrigger />`
 ## `<Controls />`
 ## `<Snap />`
+## `<[Effect] />`

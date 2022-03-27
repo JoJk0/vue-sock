@@ -1,4 +1,4 @@
-# Usage of timelines
+# Timelines
 
 ## Basic timeline
 
