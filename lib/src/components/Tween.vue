@@ -4,11 +4,11 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref, useSlots, watch, defineExpose, computed, getCurrentInstance, Ref, onUnmounted } from 'vue'
-import gsap from 'gsap'
-import { TweenState, TweenEmits, TweenProps, Writeable } from '@/types';
-import { getElementFromScopedComponent, methods } from '../utils';
+import { onMounted, ref, useSlots, watch, defineExpose, computed, getCurrentInstance, onUnmounted } from 'vue'
+import { TweenState, TweenEmits, TweenProps } from '@/types';
+import { getElementFromScopedComponent } from '../utils';
 import { config, createTween } from '../utils';
+import { useInputTargets } from '@/composables/useInputTargets';
 
 
 const props = defineProps({
@@ -58,15 +58,15 @@ const props = defineProps({
   },
   inherit: {
     type: Boolean,
-    default: false,
+    default: undefined,
   },
   immediateRender: {
     type: Boolean,
-    default: false,
+    default: undefined,
   },
   lazy: {
     type: Boolean,
-    default: true,
+    default: undefined,
   },
   keyframes: {
     type: [Object, Array],
@@ -74,7 +74,7 @@ const props = defineProps({
   },
   overwrite: {
     type: [Boolean, String],
-    default: false,
+    default: undefined,
   },
   paused: {
     type: Boolean,
@@ -82,31 +82,31 @@ const props = defineProps({
   },
   progress: {
     type: Number,
-    default: 0,
+    default: undefined,
   },
   repeat: {
     type: Number,
-    default: 0,
+    default: undefined,
   },
   repeatDelay: {
     type: Number,
-    default: 0,
+    default: undefined,
   },
   repeatRefresh: {
     type: Boolean,
-    default: false,
+    default: undefined,
   },
   reversed: {
     type: Boolean,
-    default: false,
+    default: undefined,
   },
   runBackwards: {
     type: Boolean,
-    default: false,
+    default: undefined,
   },
   stagger: {
     type: [Number, Object, Function],
-    default: 0,
+    default: undefined,
   },
   startAt: {
     type: Object,
@@ -114,11 +114,11 @@ const props = defineProps({
   },
   yoyo: {
     type: Boolean,
-    default: false,
+    default: undefined,
   },
   yoyoEase: {
     type: [Boolean, String, Function],
-    default: false,
+    default: undefined,
   },
   position: {
     type: [Number, String],
@@ -127,7 +127,7 @@ const props = defineProps({
   scrollTrigger: {
     type: Object,
     default: undefined,
-  },
+  }
 } as TweenProps)
 
 const emit = defineEmits({
@@ -154,6 +154,17 @@ const targetsVNodes = computed(() => slots.default ? slots.default() : [])
 const targetsContainerEl = ref<Element>()
 
 const instance = getCurrentInstance()
+
+// const { inputTargets } = useInputTargets({
+//   allowedInputTypes: {
+//     'slots': ['target', 'targets'],
+//     'props': ['target', 'targets'],
+//   },
+//   sources: {
+//     slots,
+//     props
+//   }
+// })
 
 // const timeline = instance?.parent?.exposed?.timeline as Ref<gsap.core.Timeline | undefined>;
 
@@ -249,6 +260,7 @@ const state: TweenState = {
   }),
 }
 
+
 defineExpose({ tween, targets })
 
 onMounted(async () => {
@@ -263,7 +275,7 @@ onMounted(async () => {
       return;
     }
 
-    emit('ready', {el: tween.value, position: props.position})
+    emit('ready', { animation: tween.value, position: props.position })
 
     tween.value.eventCallback('onComplete', () => emit('complete', tween.value))
     tween.value.eventCallback('onRepeat', () => emit('repeat', tween.value))
@@ -279,10 +291,10 @@ onMounted(async () => {
 
 watch(() => props.paused, val => {
   if (tween.value && val !== undefined)
-    if (val) tween.value.pause()
+    if (val === true) tween.value.pause()
     else {
       if (tween.value.progress() === 0)
-        tween.value.play(0)
+        tween.value.resume(0)
       else if (tween.value.progress() === 1)
         tween.value.restart()
       else {
@@ -311,12 +323,21 @@ watch(() => props.data, val => tween.value && val !== undefined ? tween.value.va
 watch(() => props.stagger, val => tween.value && val !== undefined ? tween.value.vars.stagger = val : undefined)
 watch(() => props.progress, val => tween.value && val !== undefined ? tween.value.progress(val) : undefined)
 
-watch(() => tween.value?.paused(), val => val !== undefined ? emit('pausedChange', val) : undefined)
-watch(() => tween.value?.reversed(), val => val !== undefined ? emit('reversedChange', val) : undefined)
+// watch(() => props.scrollTrigger?.trigger, val => {
+//   console.log('changes')
+//   if (tween.value && val !== undefined && tween.value.scrollTrigger) {
+//     tween.value.scrollTrigger.disable(true)
+//     tween.value.kill()
+//   }
+//   tween.value = createTween(targets.value, props)
+// })
+
+// watch(() => tween.value?.paused(), val => val !== undefined ? emit('pausedChange', val) : undefined)
+// watch(() => tween.value?.reversed(), val => val !== undefined ? emit('reversedChange', val) : undefined)
 // watch(() => tween.value?.progress(), val => {console.log('change'); return val !== undefined ? emit('progressChange', val) : undefined})
 
 onUnmounted(() => {
-  if (tween.value){ emit('destroyed', tween.value); tween.value.kill(); tween.value = undefined }
+  if (tween.value) { emit('destroyed', tween.value); tween.value.kill(); tween.value = undefined }
 })
 
 </script>

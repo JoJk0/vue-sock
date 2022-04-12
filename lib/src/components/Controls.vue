@@ -1,32 +1,48 @@
 <template>
-    <div class="controls-container" :class="{ reversed }">
+    <div class="controls-container" :class="[config.controlsClassName, { reversed }]">
         <div :class="{ 'animation-container': container }">
             <component
                 :is="wraps"
-                :progress="progress"
-                :paused="paused"
-                :reversed="reversed"
-                @update="onProgressChange($event)"
-                @pausedChange="onPausedChange($event)"
-                @reversedChange="onReversedChange($event)"
-                @complete="onPausedChange(true)"
+                :paused="true"
+                @ready="onAnimationReady($event)"
+                @update="onAnimationUpdate($event)"
             ></component>
+            <template v-if="container">            
+                <div class="overlay" v-show="completed" @click="restart">
+                    <img src="https://api.iconify.design/bi/arrow-counterclockwise.svg" class="overlay-icon" title="Restart" />
+                </div>                
+                <div class="overlay" v-show="!touched" @click="play">
+                    <img src="https://api.iconify.design/bi/play-btn.svg" class="overlay-icon" title="Play" />
+                </div>
+            </template>
         </div>
         <div class="controls">
-            <button v-show="paused" class="button play" @click="play">
+            <button v-show="paused && !completed" class="button play" @click="play">
                 <img src="https://api.iconify.design/bi/play.svg" title="Play" />
             </button>
-            <button v-show="!paused" class="button pause" @click="pause">
+            <button v-show="!paused && !completed" class="button pause" @click="pause">
                 <img src="https://api.iconify.design/bi/pause.svg" title="Pause" />
+            </button>
+            <button v-show="completed" class="button restart" @click="restart">
+                <img
+                    v-show="!reversed"
+                    src="https://api.iconify.design/bi/arrow-counterclockwise.svg"
+                    title="Pause"
+                />
+                <img
+                    v-show="reversed"
+                    src="https://api.iconify.design/bi/arrow-clockwise.svg"
+                    title="Pause"
+                />
             </button>
             <button class="button stop" @click="stop">
                 <img src="https://api.iconify.design/bi/stop.svg" title="Stop" />
             </button>
-            <div class="time">{{formattedTime}}</div>
+            <div class="time">{{ formattedTime }}</div>
             <input
                 type="range"
-                @input="setProgress($event)"
-                :value="progress"
+                @input="setTotalProgress($event)"
+                :value="totalProgress"
                 class="scrubber"
                 min="0"
                 max="1"
@@ -40,14 +56,16 @@
 </template>
 
 <script lang="ts" setup>
+import { ControlsProps } from '@/types';
 import { computed, onMounted, ref, useSlots } from 'vue';
+import { config } from '../utils';
 
 const slots = useSlots()
 
 const props = defineProps({
     initialState: {
-        type: String,
-        default: 'paused',
+        type: Object,
+        default: { paused: true },
     },
     color: {
         type: String,
@@ -57,18 +75,43 @@ const props = defineProps({
         type: Boolean,
         default: true,
     }
-})
+} as ControlsProps)
 
 const wraps = computed(() => slots.default ? slots.default()[0] : null)
 
-const progress = ref(0)
-const paused = ref(true)
-const reversed = ref(false)
-const time = ref(0)
+const animation = ref<gsap.core.Animation>()
+
+const totalProgress = ref<number>(0)
+
+const totalTime = ref<number>(0)
+
+const completed = computed(() => (totalProgress.value === 1 && !reversed.value) || (totalProgress.value === 0 && reversed.value))
+
+const touched = computed(() => (totalProgress.value !== 0 && !reversed.value) || (totalProgress.value !== 1 && reversed.value))
+
+const paused = computed<boolean>({
+    get() {
+        return animation?.value?.paused() ?? true
+    },
+    set(value) {
+        animation?.value?.paused(value)
+    },
+})
+
+const reversed = computed<boolean>({
+    get() {
+        return animation?.value?.reversed() ?? false
+    },
+    set(value) {
+        animation?.value?.reversed(value)
+    },
+})
+
+// const time = ref(0)
 
 const formattedTime = computed(() => {
-    const minutes = Math.floor(time.value / 60)
-    const seconds = Math.floor(time.value % 60)
+    const minutes = Math.floor(totalTime.value / 60)
+    const seconds = Math.floor(totalTime.value % 60)
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`
 })
 
@@ -82,31 +125,33 @@ const pause = () => {
 
 const stop = () => {
     paused.value = true
-    progress.value = reversed.value ? 1 : 0
+    totalProgress.value = reversed.value ? 1 : 0
+    animation.value?.totalProgress(totalProgress.value)
+}
+
+const restart = () => {
+    totalProgress.value = reversed.value ? 1 : 0
+    animation.value?.totalProgress(totalProgress.value)
+    paused.value = false
 }
 
 const reverse = () => {
     reversed.value = !reversed.value
 }
 
-const setProgress = (e: Event) => {
+const setTotalProgress = (e: Event | number) => {
     paused.value = true
-    progress.value = parseFloat((e.target as any)?.value as string)
+    totalProgress.value = typeof e === 'number' ? e : parseFloat((e.target as any)?.value as string)
+    animation?.value?.totalProgress(totalProgress.value)
 }
 
-const onPausedChange = (val: boolean) => {
-    console.log('onPausedChange', val)
-    paused.value = val
+const onAnimationUpdate = (animation: gsap.core.Animation) => {
+    totalProgress.value = animation.totalProgress()
+    totalTime.value = animation.totalTime()
 }
 
-const onReversedChange = (val: boolean) => {
-    console.log('onReversedChange', val)
-    reversed.value = val
-}
-
-const onProgressChange = (tween: gsap.core.Tween) => {
-    progress.value = tween.progress()
-    time.value = tween.time()
+const onAnimationReady = (e: gsap.core.Animation) => {
+    animation.value = e
 }
 
 onMounted(() => {
@@ -137,11 +182,42 @@ onMounted(() => {
         display: flex;
         justify-content: center;
         align-items: center;
+        position: relative;
+        .overlay {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 1em;
+            cursor: pointer;
+            .overlay-icon {
+                color: rgba(0,0,0,0.7);
+                width: 3em;
+                height: 3em;
+                pointer-events: none;
+            }
+            &:hover{
+                .overlay-icon {
+                    opacity: 0.7;
+                }
+            }
+        }
     }
     &.reversed {
-        .controls {
-            .play {
+        .overlay {
+            .overlay-icon {
                 transform: rotate(180deg);
+            }
+            .controls {
+                .play {
+                    transform: rotate(180deg);
+                }
             }
         }
     }
@@ -179,9 +255,9 @@ onMounted(() => {
     border-radius: 5em;
     align-items: center;
     .time {
-    padding: 0 1em;
-    width: 2em;
-    opacity: 0.7;
+        padding: 0 1em;
+        width: 2em;
+        opacity: 0.7;
     }
 }
 .scrubber {
@@ -246,6 +322,14 @@ onMounted(() => {
 body.dark,
 html.dark {
     .controls-container {
+        .animation-container {
+            .overlay {
+                background: rgba(0, 0, 0, 0.5);
+                .overlay-icon {
+                    filter: invert(1);
+                }
+            }
+        }
         .controls {
             background: #1c1c1c;
             .scrubber {

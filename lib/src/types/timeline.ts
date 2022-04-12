@@ -1,5 +1,5 @@
 import { PropType } from 'vue';
-import { EmitKeys, ScrollTriggerTweenTimelineOptions } from '.';
+import { EmitKeys, Propify, ScrollTriggerTweenTimelineOptions, TargetString, TimelineFunctionTarget, TimelineTarget, TweenTarget, XOR } from '.';
 
 export type TimelineOptions = {
     /** If `autoRemoveChildren` is set to `true`, as soon as child tweens/timelines complete, they will automatically get killed/removed. This is normally undesireable because it prevents going backwards in time (like if you want to `reverse()` or set the progress lower, etc.). It can, however, improve speed and memory management. The root timelines use `autoRemoveChildren: true`. */
@@ -31,38 +31,24 @@ export type TimelineOptions = {
 
 } & TimelineTweenOptions & ScrollTriggerTweenTimelineOptions
 
-export type TimelineTargetString = `.${string}` | `#${string}`
-export type TimelineTarget = (Element | TimelineTargetString)
-export type TimelineTargets = TimelineTarget[]
+export type TimelineChild = TimelineTarget | TweenTarget | TimelineFunctionTarget
+export type TimelineChildren = TimelineChild[]
+
+export type TimelineChildrenOptions = {
+    /** Children that the timeline applies to. Can be an array of tween, timeline, function, or a name of tween / timeline */
+    children?: TimelineChildren
+}
+export type TimelineChildOptions = {
+    /** A child that the timeline applies to. Can be a tween, timeline, function, or a name of tween / timeline */
+    child?: TimelineChild
+}
 
 export type TimelineTweenOptions = {
     /** Sets position of tween/timeline on the timeline. Ignored if tween/timeline is not in timeline */
     position?: gsap.Position;
 }
 
-export type TimelineProps = {
-    [P in keyof Required<TimelineOptions>]: {
-        type: PropType<TimelineOptions[P]>,
-        default: TimelineOptions[P]
-    }
-} & {
-    tween: {
-        type: PropType<gsap.core.Tween>,
-        default: gsap.core.Tween | undefined
-    },
-    tweens: {
-        type: PropType<gsap.core.Tween[]>,
-        default: gsap.core.Tween[] | undefined
-    },
-    timeline: {
-        type: PropType<gsap.core.Timeline>,
-        default: gsap.core.Timeline | undefined
-    },
-    timelines: {
-        type: PropType<gsap.core.Timeline[]>,
-        default: gsap.core.Timeline[] | undefined
-    }
-} & TimelineState
+export type TimelineProps = Propify<TimelineOptions> & Propify<TimelineChildOptions> & Propify<TimelineChildrenOptions> & TimelineState
 
 export type TimelineEmits = {
     [P in EmitKeys<gsap.CallbackType>]: (timeline: gsap.core.Timeline) => gsap.core.Timeline

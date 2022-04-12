@@ -11,7 +11,7 @@
     </a>
     <a href="https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/README.md">
       <img src="https://raw.githubusercontent.com/JoJk0/StandWithUkraine/patch-1/badges/StandWithUkraineFlat.svg" alt="version" />
-    </a>
+    </a>    
   </h3>
 </p>
 
@@ -24,6 +24,9 @@ Vue wrapper for GreenSock Animation Platform (GSAP)
 
 - **✨  Reactive animations** <br />
   Don't worry about updating animations manually
+
+- **🎯  Scoped targets** <br />
+  Target elements by scoped IDs and classes within your Vue component
 
 - **🎼  Composition API** <br />
   Use composables if you prefer more programmatic approach
@@ -102,3 +105,6 @@ Once implemented, [Netlify](https://www.netlify.com/) is expected to be used for
 Help support my open-source work through [PayPal](https://paypal.com) and [GitHub Sponsors](https://github.com/sponsors/JoJk0?o=esb).
 
 <a href="https://www.paypal.com/donate/?hosted_button_id=MVYGX9EHYRN9W"><img src="https://pics.paypal.com/00/s/YTRmYmIzYjgtNDA5My00YzY5LWJmN2QtNmMyNTU2ZGUwOTYw/file.PNG" border="0" height="35" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" /></a>
+
+## License
+MIT License © 2022 Jacob Janisz

@@ -1,5 +1,6 @@
 import { ComputedRef, PropType, Ref, WritableComputedRef } from 'vue';
-import { EmitKeys, Propify, ScrollTriggerTweenTimelineOptions } from '.';
+import { ElementTarget, EmitKeys, OnReadyEmit, Propify, ScrollTriggerTweenTimelineOptions } from '.';
+import { AnimationControlsOptions } from './controls';
 import { TimelineTweenOptions } from './timeline';
 
 export type TweenOptions = {
@@ -78,20 +79,21 @@ export type TweenOptions = {
 
 } & TimelineTweenOptions & ScrollTriggerTweenTimelineOptions
 
-export type TweenTargetString = `.${string}` | `#${string}`
-export type TweenTarget = (Element | TweenTargetString)
+export type UseTweenOptions = TweenOptions & AnimationControlsOptions
+export type TweenTarget = ElementTarget
 export type TweenTargets = TweenTarget[]
 
-export type TweenProps = Propify<TweenOptions> & {
-    target: {
-        type: PropType<TweenTarget>,
-        default: TweenTarget | undefined
-    },
-    targets: {
-        type: PropType<TweenTargets>,
-        default: TweenTargets | undefined
-    }
-} & TweenState
+export type TweenTargetOptions = {
+    /** An element or ID/classname of element this tween is applied to */
+    target?: TweenTarget
+}
+
+export type TweenTargetsOptions = {
+    /** An array of elements or IDs/classnames of elements this tween is applied to */
+    targets?: TweenTargets
+}
+
+export type TweenProps = Propify<TweenOptions & TweenTargetOptions & TweenTargetsOptions & TweenState>
 
 export type TweenMethods = {}
 
@@ -114,8 +116,6 @@ export type TweenRefs = {
     isActive: ComputedRef<boolean | undefined>,
 }
 
-
-
 export type TweenEvents = {
     [P in gsap.CallbackType]: (hook: (tween: gsap.core.Tween) => void) => void
 }
@@ -128,7 +128,7 @@ export type TweenInternalEmits = {
     // progressChange: (e: number) => number,
     pausedChange: (e: boolean) => boolean,
     reversedChange: (e: boolean) => boolean,
-    ready: (e: { el: gsap.core.Tween, position?: gsap.Position }) => { el: gsap.core.Tween, position?: gsap.Position },
+    ready: (e: OnReadyEmit<gsap.core.Tween>) => OnReadyEmit<gsap.core.Tween>,
     destroyed: (e: gsap.core.Tween) => gsap.core.Tween,
 }
 
@@ -160,8 +160,5 @@ export type TweenState = {
     // isActive: ComputedRef<boolean | undefined>,
     // duration: WritableComputedRef<number | undefined>,
     // delay: WritableComputedRef<number | undefined>,
-    progress: {
-        type: NumberConstructor,
-        default: number
-    }
+    progress?: number
 }

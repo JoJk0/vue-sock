@@ -1,6 +1,6 @@
 import { PropType } from 'vue';
 import type ScrollTrigger from 'gsap'
-import { EmitKeys } from '.';
+import { ElementTarget, EmitKeys, Propify, TimelineTarget, TweenTarget } from '.';
 export type ScrollTriggerOptions = {
 
     /** A GSAP Tween or Timeline instance that should be controlled by the ScrollTrigger. Only one animation is controlled per ScrollTrigger, but you can wrap all your animations in a single Timeline (best) or create multiple ScrollTriggers if you prefer. */
@@ -67,9 +67,6 @@ export type ScrollTriggerOptions = {
     /** It's **VERY** unlikely that you'd need to define a `refreshPriority` as long as you create your ScrollTriggers in the order they'd happen on the page (top-to-bottom or left-to-right)...which we strongly recommend doing. Otherwise, use `refreshPriority` to influence the order in which ScrollTriggers get refreshed to ensure that the pinning distance gets added to the start/end values of subsequent ScrollTriggers further down the page (that's why order matters). See the sort() method for details. A ScrollTrigger with `refreshPriority: 1` will get refreshed earlier than one with `refreshPriority: 0` (the default). You're welcome to use negative numbers too, and you can assign the same number to multiple ScrollTriggers. */
     refreshPriority?: ScrollTrigger.StaticVars['refreshPriority'];
 
-    /** By default, the `scroller` is the **viewport** itself, but if you'd like to add a ScrollTrigger to a scrollable <div>, for example, just define that as the scroller. You can use selector text like "#elementID" or the element itself. */
-    scroller?: ScrollTrigger.StaticVars['scroller'];
-
     /**
      * Links the progress of the animation directly to the scrollbar so it acts like a scrubber. You can apply smoothing so that it takes a little time for the playhead to catch up with the scrollbar's position! It can be any of the following
      * 
@@ -91,25 +88,30 @@ export type ScrollTriggerOptions = {
     /** Adds/removes a class to an element (or multiple elements) when the ScrollTrigger toggles active/inactive. */
     toggleClass?: ScrollTrigger.StaticVars['toggleClass'];
 
-    /** The element (or selector text for the element) whose position in the normal document flow is used to calculate where the ScrollTrigger starts. */
-    trigger?: ScrollTrigger.StaticVars['trigger'];
+} & ScrollTriggerScrollerOptions & ScrollTriggerTriggerOptions
+
+export type ScrollTriggerChild = TimelineTarget | TweenTarget
+
+export type ScrollTriggerChildOptions = {
+    /** A child that ScrollTrigger applies to. Can be a tween, timeline, or a name of tween / timeline */
+    child?: ScrollTriggerChild;
 }
 
-export type ScrollTriggerProps = {
-    [P in keyof Required<ScrollTriggerOptions>]: {
-        type: PropType<ScrollTriggerOptions[P]>,
-        default: ScrollTriggerOptions[P]
-    }
-} & {
-    tween: {
-        type: PropType<gsap.core.Tween>,
-        default: gsap.core.Tween | undefined
-    },
-    timeline: {
-        type: PropType<gsap.core.Timeline>,
-        default: gsap.core.Timeline | undefined
-    }
+export type ScrollTriggerScroller = ElementTarget | Window
+
+export type ScrollTriggerScrollerOptions = {
+    /** By default, the `scroller` is the **viewport** itself, but if you'd like to add a ScrollTrigger to a scrollable <div>, for example, just define that as the scroller. You can use selector text like "#elementID" or the element itself. */
+    scroller?: ScrollTriggerScroller
 }
+
+export type ScrollTriggerTrigger = ElementTarget
+
+export type ScrollTriggerTriggerOptions = {
+    /** The element (or selector text for the element) whose position in the normal document flow is used to calculate where the ScrollTrigger starts. */
+    trigger?: ScrollTriggerTrigger;
+}
+
+export type ScrollTriggerProps = Propify<ScrollTriggerOptions> & Propify<ScrollTriggerChildOptions>
 
 export type ScrollTriggerTweenTimelineOptions = {
     /** ScrollTrigger vars for tween/timeline. Used internally by `<ScrollTrigger>` and `useScrollTrigger()` */

@@ -6,9 +6,10 @@
                 <img src="https://api.iconify.design/ion/logo-codepen.svg" />
             </a>
         </div>
-        <Controls>
+        <Controls v-if="component">
             <component :is="wrappedEl"></component>
         </Controls>
+        <component v-else :is="wrappedEl"></component>
     </div>
 </template>
 
@@ -21,6 +22,14 @@ const props = defineProps({
     penLink: {
         type: String,
         default: null,
+    },
+    component: {
+        type: Boolean,
+        default: false,
+    },
+    composable: {
+        type: Boolean,
+        default: false,
     }
 });
 
@@ -49,9 +58,10 @@ const wrappedEl = computed(() => slots.default ? slots.default()[0] : null)
         padding: 0;
         margin: 0;
         position: absolute;
-        top: 0;
-        right: 0;
+        top: 0.5em;
+        right: 0.5em;
         opacity: 0.7;
+        z-index: 9;
         transition: background-color 0.2s ease-in-out, opacity 0.2s ease-in-out;
         &:hover {
             opacity: 1;

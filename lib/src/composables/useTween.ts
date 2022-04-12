@@ -1,40 +1,55 @@
-import { TweenEvents, TweenOptions, TweenRefs, UseTweenActions, UseTweenReturn } from '@/types';
+import { TweenEvents, UseTweenOptions, TweenRefs, UseTweenActions, UseTweenReturn } from '@/types';
 import { methods, warnTweenNotFound } from '../utils';
 import gsap from 'gsap'
-import { computed, ComputedRef, onMounted, Ref, ref, toRefs } from 'vue'
-import { Tween } from '..';
+import { computed, ComputedRef, defineAsyncComponent, getCurrentInstance, onMounted, Ref, ref, toRefs } from 'vue'
+import { Controls, Tween } from '..';
+import { h } from 'vue';
 
 /** GSAP Tween composable function
  * @param options - tween options
  */
 
-export function useTween(options: TweenOptions): UseTweenReturn<'targetRefs'>
-export function useTween(options: TweenOptions, targets: HTMLElement[]): UseTweenReturn<'actionsOnly'>
+export function useTween(options: UseTweenOptions): UseTweenReturn<'targetRefs'>
+export function useTween(options: UseTweenOptions, targets: HTMLElement[]): UseTweenReturn<'actionsOnly'>
 export function useTween(tweenComponent: typeof Tween): UseTweenReturn<'actionsOnly'>
 // export function useTween(): UseTweenReturn<'targetRef'>
 
-export function useTween(arg1: TweenOptions | typeof Tween, arg2?: HTMLElement[]) {
+export function useTween(arg1: UseTweenOptions | typeof Tween, arg2?: HTMLElement[]) {
     // const refEl = ref<HTMLElement>()
-    if (typeof arg1 !== 'object') { console.error('VueSock: invalid arguments - must be either Tween component instance, or TweenOptions'); return };
+    if (typeof arg1 !== 'object') { console.error('VueSock: invalid arguments - must be either Tween component instance, or UseTweenOptions'); return };
 
     const isComponent = arg1 && typeof (arg1 as any)?.render === 'function'
 
-    const isTweenOptions = !isComponent && (!!arg1.from || !!arg1.to)
+    const isUseTweenOptions = !isComponent && (!!arg1.from || !!arg1.to)
 
-    const options = (isComponent ? (arg1 as typeof Tween).props : isTweenOptions ? arg1 : undefined) as TweenOptions | undefined
+    const options = (isComponent ? (arg1 as typeof Tween).props : isUseTweenOptions ? arg1 : undefined) as UseTweenOptions | undefined
     if (!options) {
-        console.error('VueSock: invalid arguments - must be either Tween component instance, or TweenOptions');
+        console.error('VueSock: invalid arguments - must be either Tween component instance, or UseTweenOptions');
         return
     }
 
-    const targets = isComponent ? ((arg1 as typeof Tween).targets as ComputedRef<HTMLElement[]>).value.map(target => ref(target)) : arg2 ? toRefs(arg2) : isTweenOptions ? [100].map(i => ref<HTMLElement>()) : undefined;
+    const targets = isComponent ? ((arg1 as typeof Tween).targets as ComputedRef<HTMLElement[]>).value.map(target => ref(target)) : arg2 ? toRefs(arg2) : isUseTweenOptions ? [100].map(i => ref<HTMLElement>()) : undefined;
     if (!targets) {
-        console.error('VueSock: invalid arguments - must be either Tween component instance, or TweenOptions');
+        console.error('VueSock: invalid arguments - must be either Tween component instance, or UseTweenOptions');
         return
     }
 
     const tween = isComponent ? (arg1 as typeof Tween).tween as Ref<gsap.core.Tween | undefined> : ref<gsap.core.Tween>()
 
+    if (options.controls) {
+        const instance = getCurrentInstance()
+        if (!instance) {
+            console.error('VueSock: No component instance found. Make sure you are using the `useTween` hook inside setup.');
+            return
+        }
+        console.log(instance)
+        if (typeof options.controls === 'boolean') {
+        }
+        const controlsComponent = defineAsyncComponent(() => import("../components/Controls.vue"))
+        const controlsVNode = h(controlsComponent, options.controls, instance.slots)
+        instance.vnode.children = [controlsVNode]
+    }
+    
     onMounted(() => {
         if (!targets[0].value) {
             console.error('VueSock: No targets provided');

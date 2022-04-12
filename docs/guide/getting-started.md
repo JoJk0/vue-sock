@@ -38,23 +38,114 @@ You can either use components, or composable functions to build your animations,
 <CodeGroup>
   <CodeGroupItem title="Components">
 
-@[code{0-16}](../.vuepress/components/guide/getting-started/BasicUsageComponent.vue)
+@[code{0-12}](../.vuepress/components/guide/getting-started/BasicUsageComponent.vue)
 
-<AppExample penLink="https://codepen.io/jojk0/pen/yLpVpMO">
+<AppExample component penLink="https://codepen.io/jojk0/pen/yLpVpMO">
   <BasicUsageComponent />
 </AppExample>
 
   </CodeGroupItem>
-    <CodeGroupItem title="Composables">
+  <CodeGroupItem title="Composables">
 
-<!-- @[code{0-20}](../.vuepress/components/guide/getting-started/BasicUsageComposition.vue) -->
+@[code{0-16}](../.vuepress/components/guide/getting-started/BasicUsageComposable.vue)
 
-<BasicUsageComposition />
+<AppExample composable penLink="https://codepen.io/jojk0/pen/qBpVvwo">
+  <BasicUsageComposable />
+</AppExample>
 
   </CodeGroupItem>
 </CodeGroup>
 
 ## Specifying targets
+A target could be an `element`, `tween` or `timeline` or an array of those targets depending on what you use. 
+Following properties are accepted:
+
+- `Tween` has `target` or `targets` and accepts element(s)
+
+- `Timeline` has `child` or `children` and accepts tween(s), timeline(s)
+
+- `ScrollTrigger` has `child` and accepts a tween, or a timeline
+
+- `[Effect]` has:
+  - `target` or `targets` and accepts element(s) if it's a tween
+  -  `child` or `children` and accepts tween(s), timeline(s) if it's a timeline
+
+Depending on complexity of your project, you can specify the targets in 4 cardinalities, ranging from `1:1` to `M:N`.
+
+## Relationship Table
+
+|  entity/input type| target | targets | tween | tweens | timeline | timelines | scrollTrigger | controls
+| ----------------- | ------ | ------- | ----- | ------ | -------- | --------- | ------------- | --------
+| target            |   ✅     |    ✅     |   ✅    |   ✅     |   ✅       |    ✅       |      ✅         |      ✅    
+| targets           |   ✅     |     ✅    |    ✅   |    ✅    |   ✅       |    ✅       |       ✅        |       ✅   
+| tween             |    ✅    |    ✅     |       |        |          |           |      ✅         |    ✅     
+| tweens            |    ✅    |    ✅     |       |        |          |           |               |          
+| timeline          |        |         |   ✅    |    ✅    |     ✅     |    ✅       |    ✅      | ✅         
+| timelines         |        |         |    ✅   |    ✅    |     ✅     |     ✅     |               |          
+| scrollTrigger     |        |         |    ✅   |        |      ✅    |           |               |      ✅    
+| controls          |   ✅     |         |    ✅   |        |    ✅      |           |      ✅         |          
+
+### tween (`<Tween />` & `useTween()`)
+|  input/method     | slot | prop | param | destruct | arg
+| ----------------- | ---- | ---- | ----- | -------- | ---
+| target            |  ✅   |  ✅    |       |     | ✅
+| targets           |  ✅   |  ✅    |       |   ✅  | ✅
+
+### timeline (`<Timeline />` & `useTimeline()`)
+|  input/method     | slot | prop | param | destruct | arg
+| ----------------- | ---- | ---- | ----- | -------- | ---
+| target            |      |      |       |     | 
+| targets           |      |      |       |   ✅  | 
+| tween             |  ✅   |  ✅  |   ✅   |       |    
+| tweens            |   ✅   |   ✅   |    ✅   |           
+| timeline          |   ✅   |    ✅  |    ✅   |           
+| timelines         |   ✅   |    ✅  |    ✅   |           
+| scrollTrigger     |      |      |    ✅   |           
+| controls          |      |      |       |           
+
+### ScrollTrigger (`<ScrollTrigger />` & `useScrollTrigger()`)
+|  input/method     | slot | prop | param | destruct | arg
+| ----------------- | ---- | ---- | ----- | -------- | ---
+| target            |      |      |       |     | 
+| targets           |      |      |       |     | 
+| tween             |  ✅   |  ✅  |   ✅   |       |    
+| tweens            |      |      |       |           
+| timeline          |   ✅   |    ✅  |    ✅   |           
+| timelines         |      |      |       |           
+| scrollTrigger     |      |      |       |           
+| controls          |      |      |       |           
+
+
+### controls (`<Controls />`)
+|  input/method     | slot | prop | param | destruct | arg
+| ----------------- | ---- | ---- | ----- | -------- | ---
+| target            |      |      |       |     | 
+| targets           |      |      |       |     | 
+| tween             |  ✅   |  ✅  |   ✅   |       |    
+| tweens            |   ✅   |   ✅   |    ✅   |           
+| timeline          |   ✅   |    ✅  |    ✅   |           
+| timelines         |   ✅   |    ✅  |    ✅   |           
+| scrollTrigger     |   ✅   |    ✅  |    ✅   |           
+| controls          |      |      |       |           
+
+tween -> target, targets
+timeline -> animation, animations, scrollTrigger
+scrollTrigger -> animation
+
+controls -> animation, scrollTrigger
+
+one-to-one one-to-many many-to-one many-to-many
+
+:target :targets :tween :tweens :timeline :timelines :scrollTrigger
+
+input type -> slot (C), prop (C), param (c), destruct (c), arg (c)
+
+- slot - through component slot
+- prop - through component prop
+- param - through composable parameter option
+- destruct - through destructuring array of refs from composable return
+- arg - through composable function argument
+
 ### Components
 One target in a slot (one-to-one)
 
@@ -99,11 +190,17 @@ Many targets as a parameter (many-to-many)
 <Tween :targets="['.boxOne', '.boxTwo', '.boxThree']" :from="{ xPercent: 0 }" :to="{ xPercent: 20 }" :stagger="0.2" />
 ```
 
-`Tween` accepts `target` or `targets`
+Depending on what you use, you can also mix props with slots. If allowed, they will be merged in one array with targets in **slot to be added first** in order.
 
-`Timeline` accepts `tween` or `tweens`, `timeline` or `timelines`
+```html
+<div class="boxOne">Hello VueSock!</div>
 
-`ScrollTrigger` accepts `tween`, `timeline`
+<Tween :from="{ opacity: 0 }" :to="{ opacity: 1 }" target=".boxOne">
+  <div class="box">Hello Vue Sock!</div>
+</Tween>
+```
+
+Produces `['.box', '.boxOne']` target array
 
 ### Composables
 Targets can be specified by destructuring the `targets` array containing up to 100 temporary refs under the hood. After destructure, in `<script setup>` refs are automatically exposed to template and therefore, filled with the elements once mounted. This way you don't need to declare the targets separately.
@@ -186,3 +283,19 @@ You can use Components for your development:
 
 ### Usage with Composition API
 For Composition API, Composables are recommended, however Components can be used as well.
+
+## TypeScript
+The whole project is fully typed. If you intend to use any GSAP plugins, in order to get proper types for animations, declare the plugins that you will use via `GSAPPlugins` type. All plugins' options will be then available in animations.
+
+```ts{3}
+import { configureGSAP } from 'vue-sock'
+
+declare type GSAPPlugins = typeof plugins
+
+const plugins = [ ScrollTrigger ]
+
+configureGSAP({
+  plugins
+})
+
+```

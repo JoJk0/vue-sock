@@ -1,25 +1,43 @@
 import { Propify, TweenTarget, TweenTargets } from '@/types';
-import { EffectOptions, EffectProps } from '@/types/effect';
+import { EffectChildOptions, EffectChildrenOptions, EffectOptions, EffectProps, EffectTargetOptions, EffectTargetsOptions } from '@/types/effect';
 import { filterOptions } from '@/utils';
 import gsap from 'gsap'
 import { ComponentObjectPropsOptions, defineComponent, onMounted, Prop, PropType } from 'vue';
 
-export const defineEffect = <TCustomVars extends Prop<any>, TExtendsBoolean extends boolean, TEffectReturn, TName extends string, TDefaults>(options: EffectOptions<TCustomVars, TExtendsBoolean, TEffectReturn, TName, TDefaults>) => {
+export const defineEffect = <TCustomVars extends ComponentObjectPropsOptions, TExtendsTimeline extends boolean, TEffectReturn extends (TExtendsTimeline extends true ? gsap.core.Tween | gsap.core.Timeline : any), TName extends string, TDefaults>(options: EffectOptions<TCustomVars, TExtendsTimeline, TEffectReturn, TName, TDefaults>) => {
     
     const filteredOptions = filterOptions(options, ['customVars'])
     
     gsap.registerEffect(filteredOptions);
 
-    const props = {
-        ...options.customVars,
+    const hasTarget = options.effect() instanceof gsap.core.Tween;
+
+    const targetProps = {
         target: {
-            type: [Object, String] as PropType<TweenTarget>,
+            type: [Object, String],
             default: undefined,
         },
         targets: {
-            type: Array as PropType<TweenTargets>,
+            type: Array,
+            default: undefined,
+        }
+    } as Propify<EffectTargetOptions & EffectTargetsOptions>;
+
+    const childProps = {
+        child: {
+            type: [Object, String],
             default: undefined,
         },
+        children: {
+            type: Array,
+            default: undefined,
+        }
+    } as Propify<EffectChildOptions & EffectChildrenOptions>; 
+
+    const props = {
+        ...options.customVars,
+        ...targetProps,
+        ...childProps,
         position: {
             type: [Number, String] as PropType<gsap.Position>,
             default: undefined,

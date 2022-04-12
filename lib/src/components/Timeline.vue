@@ -7,7 +7,7 @@
 import { computed, onUnmounted, ref } from 'vue'
 import { onMounted, useSlots } from 'vue'
 import gsap from 'gsap'
-import { TimelineEmits, TimelineProps } from '@/types';
+import { OnReadyEmit, TimelineEmits, TimelineProps } from '@/types';
 import { config } from '../utils';
 
 const props = defineProps({
@@ -51,26 +51,18 @@ const props = defineProps({
     type: [Number, String],
     default: undefined,
   },
-  tween: {
-    type: Object,
-    default: undefined,
-  },
-  tweens: {
-    type: Array,
-    default: undefined,
-  },
-  timeline: {
-    type: Object,
-    default: undefined,
-  },
-  timelines: {
-    type: Array,
-    default: undefined,
-  },
   scrollTrigger: {
     type: Object,
     default: undefined,
   },
+  child: {
+    type: [Object, String, Function],
+    default: undefined,
+  },
+  children: {
+    type: Array,
+    default: undefined,
+  }
 } as TimelineProps)
 
 const emit = defineEmits({
@@ -111,10 +103,10 @@ const targetsContainerEl = ref<Element>()
 
 // const targets = computed(() => targetsContainerEl.value ? Array.from(targetsContainerEl.value.children).filter(el => el.className === config.tweenClassName || el.className === config.timelineClassName) : [])
 
-const onTargetReady = ({el, position}: {el: gsap.core.Timeline | gsap.core.Tween, position?: gsap.Position}) => {
+const onTargetReady = ({animation, position}: OnReadyEmit<gsap.core.Animation>) => {
 
   if(!timeline.value) return;
-  timeline.value.add(el.paused(false), position)
+  timeline.value.add(animation.paused(false), position)
 
   if(timeline.value.getChildren().length === targetsVNodes.value.length && !props.paused){
     timeline.value.play()

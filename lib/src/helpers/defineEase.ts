@@ -2,9 +2,9 @@ import gsap from 'gsap'
 
 export type EaseOptions = {
     name: string,
-    easeFunction: gsap.EaseFunction
+    ease: gsap.EaseFunction
 }
 
 export const defineEase = (options: EaseOptions) => {
-    gsap.registerEase(options.name, options.easeFunction);
+    gsap.registerEase(options.name, options.ease);
 }

@@ -1,15 +1,21 @@
 <template>
   <div :class="config.scrollTriggerClassName" ref="targetsContainerEl">
-   <component v-if="vNode" :paused="true" :scrollTrigger="vars" :is="vNode" />
+    <!-- <component v-if="vNode" :paused="true" :is="vNode" /> -->
+    <component 
+    v-if="isElementsReady" 
+    :paused="true" 
+    :scrollTrigger="filteredVars" 
+    :is="vNode" 
+    />
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, PropType, ref } from 'vue'
+import { computed, getCurrentInstance, PropType, ref, watch } from 'vue'
 import { onMounted, useSlots } from 'vue'
 import gsap from 'gsap'
-import {ScrollTrigger} from 'gsap/ScrollTrigger'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ScrollTriggerEmits, ScrollTriggerProps } from '@/types';
-import { config } from '../utils';
+import { config, filterOptions, getElementFromScopedComponent, useScopedQuerySelector } from '../utils';
 
 const props = defineProps({
   animation: {
@@ -115,13 +121,9 @@ const props = defineProps({
   trigger: {
     type: [String, Object],
     default: undefined,
-  }, 
-  tween: {
-    type: Object,
-    default: undefined,
   },
-  timeline: {
-    type: Object,
+  child: {
+    type: [Object, String],
     default: undefined,
   },
 } as ScrollTriggerProps)
@@ -144,40 +146,55 @@ const emit = defineEmits({
   // ready: e => e,
   // destroyed: e => e,
 } as ScrollTriggerEmits)
-
+// TODO: recalc scrolltrigger trigger after pinning of elements before it
 gsap.registerPlugin(ScrollTrigger)
 
 const slots = useSlots()
 
-const scrollTrigger = ref<ScrollTrigger>()
+const instance = getCurrentInstance()
+
+const targetsContainerEl = ref<HTMLElement>()
+
+const triggerEl = useScopedQuerySelector(props.trigger)
+
+const isElementsReady = computed(() => {
+  const a = vNode && ((props.trigger && !!triggerEl.value) || !props.trigger)
+  return a
+})
 
 const vars = computed<ScrollTrigger.Vars>(() => ({
-    anticipatePin: props.anticipatePin,
-    containerAnimation: props.containerAnimation,
-    end: props.end,
-    endTrigger: props.endTrigger,
-    fastScrollEnd: props.fastScrollEnd,
-    horizontal: props.horizontal,
-    id: props.id,
-    invalidateOnRefresh: props.invalidateOnRefresh,
-    markers: props.markers,
-    once: props.once,
-    pin: props.pin,
-    pinnedContainer: props.pinnedContainer,
-    pinReparent: props.pinReparent,
-    pinSpacer: props.pinSpacer,
-    pinSpacing: props.pinSpacing,
-    pinType: props.pinType,
-    preventOverlaps: props.preventOverlaps,
-    refreshPriority: props.refreshPriority,
-    scrub: props.scrub,
-    snap: props.snap,
-    start: props.start,
-    toggleActions: props.toggleActions,
-    toggleClass: props.toggleClass,
-    trigger: props.trigger,
-    scroller: props.scroller,
+  anticipatePin: props.anticipatePin,
+  containerAnimation: props.containerAnimation,
+  end: props.end,
+  endTrigger: props.endTrigger,
+  fastScrollEnd: props.fastScrollEnd,
+  horizontal: props.horizontal,
+  id: props.id,
+  invalidateOnRefresh: props.invalidateOnRefresh,
+  markers: props.markers,
+  once: props.once,
+  pin: props.pin,
+  pinnedContainer: props.pinnedContainer,
+  pinReparent: props.pinReparent,
+  pinSpacer: props.pinSpacer,
+  pinSpacing: props.pinSpacing,
+  pinType: props.pinType,
+  preventOverlaps: props.preventOverlaps,
+  refreshPriority: props.refreshPriority,
+  scrub: props.scrub,
+  snap: props.snap,
+  start: props.start,
+  toggleActions: props.toggleActions,
+  toggleClass: props.toggleClass,
+  trigger: triggerEl.value,
+  scroller: typeof props.scroller === 'string' && instance ? getElementFromScopedComponent(props.scroller, instance) : props.scroller,
+  onToggle: scrollTrigger => {
+    // refresh because height start changes
+    scrollTrigger.refresh()
+  },
 }))
+
+const filteredVars = computed(() => filterOptions(vars.value))
 
 const vNode = computed(() => {
   const slot = slots.default && slots.default()
@@ -186,16 +203,26 @@ const vNode = computed(() => {
 
 onMounted(() => {
 
-  if(slots.default && slots.default().length > 1) {
+  if (!targetsContainerEl.value) {
+    console.error('ScrollTrigger: targetsContainerEl is not defined')
+    return
+  }
+
+  // scrollTrigger.value = ScrollTrigger.create({
+  //   animation: ,
+  //   ...filteredVars.value
+  // })
+
+  if (slots.default && slots.default().length > 1) {
     console.warn('ScrollTrigger: Only one element is allowed')
   }
 
   if (vNode.value) {
-    const { start, end, scrub, markers } = props
+    // const { start, end, scrub, markers } = props
 
-    const scrollTrigger = {
-      ...props,
-    }
+    // const scrollTrigger = {
+    //   ...props,
+    // }
   }
   else {
     console.warn('vue-sock: ScrollTrigger: No content found')

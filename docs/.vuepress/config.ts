@@ -16,8 +16,8 @@ export default defineUserConfig<DefaultThemeOptions>({
         ['link', { rel: 'icon', href: '/logo.svg' }],
         ['meta', { name: 'twitter:site', content: '@jojk0/vue-sock' }],
         ['meta', { name: 'twitter:card', content: 'A GreenSock for Vue' }],
-        ['meta', { name: 'application-name', content: 'VuePress' }],
-        ['meta', { name: 'apple-mobile-web-app-title', content: 'VuePress' }],
+        ['meta', { name: 'application-name', content: 'VueSock' }],
+        ['meta', { name: 'apple-mobile-web-app-title', content: 'VueSock' }],
         [
             'meta',
             { name: 'apple-mobile-web-app-status-bar-style', content: 'black' },
@@ -31,11 +31,11 @@ export default defineUserConfig<DefaultThemeOptions>({
             {
                 rel: 'mask-icon',
                 href: '/images/icons/safari-pinned-tab.svg',
-                color: '#3eaf7c',
+                color: '#74b300',
             },
         ],
-        ['meta', { name: 'msapplication-TileColor', content: '#3eaf7c' }],
-        ['meta', { name: 'theme-color', content: '#3eaf7c' }],
+        ['meta', { name: 'msapplication-TileColor', content: '#74b300' }],
+        ['meta', { name: 'theme-color', content: '#74b300' }],
         [
             'meta',
             {
@@ -98,10 +98,25 @@ export default defineUserConfig<DefaultThemeOptions>({
                 componentsPatterns: ['**/*.vue'],
                 components: {
                     BasicUsageComponent: resolvePath('./components/guide/getting-started/BasicUsageComponent.vue'),
-                    BasicUsageComposition: resolvePath('./components/guide/getting-started/BasicUsageComposition.vue'),
+                    BasicUsageComposable: resolvePath('./components/guide/getting-started/BasicUsageComposable.vue'),
                     OptionsAPI: resolvePath('./components/guide/getting-started/OptionsAPI.vue'),
                 }
             },
+        ],
+        [
+            '@vuepress/plugin-docsearch',
+            {
+                apiKey: '199061e89be8ef89092e1ec927acc2b1',
+                indexName: 'vue-sock',
+                tags: true,
+                placeholder: 'Search...',
+                display: 'fullscreen',
+                algoliaOptions: {
+                    facetFilters: [
+                        'version:vue-sock',
+                    ],
+                },
+            }
         ]
     ],
 })
