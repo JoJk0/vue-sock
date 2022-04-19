@@ -7,32 +7,44 @@
                 @ready="onAnimationReady($event)"
                 @update="onAnimationUpdate($event)"
             ></component>
-            <template v-if="container">            
+            <template v-if="container">
                 <div class="overlay" v-show="completed" @click="restart">
-                    <img src="https://api.iconify.design/bi/arrow-counterclockwise.svg" class="overlay-icon" title="Restart" />
-                </div>                
+                    <img
+                        src="https://api.iconify.design/bi/arrow-counterclockwise.svg"
+                        class="overlay-icon"
+                        title="Restart"
+                        alt="Restart"
+                    />
+                </div>
                 <div class="overlay" v-show="!touched" @click="play">
-                    <img src="https://api.iconify.design/bi/play-btn.svg" class="overlay-icon" title="Play" />
+                    <img
+                        src="https://api.iconify.design/bi/play-btn.svg"
+                        class="overlay-icon"
+                        title="Play"
+                        alt="Play"
+                    />
                 </div>
             </template>
         </div>
         <div class="controls">
             <button v-show="paused && !completed" class="button play" @click="play">
-                <img src="https://api.iconify.design/bi/play.svg" title="Play" />
+                <img src="https://api.iconify.design/bi/play.svg" title="Play" alt="Play" />
             </button>
             <button v-show="!paused && !completed" class="button pause" @click="pause">
-                <img src="https://api.iconify.design/bi/pause.svg" title="Pause" />
+                <img src="https://api.iconify.design/bi/pause.svg" title="Pause" alt="Pause" />
             </button>
             <button v-show="completed" class="button restart" @click="restart">
                 <img
                     v-show="!reversed"
                     src="https://api.iconify.design/bi/arrow-counterclockwise.svg"
                     title="Pause"
+                    alt="Pause"
                 />
                 <img
                     v-show="reversed"
                     src="https://api.iconify.design/bi/arrow-clockwise.svg"
                     title="Pause"
+                    alt="Play"
                 />
             </button>
             <button class="button stop" @click="stop">
@@ -49,21 +61,25 @@
                 step="0.01"
             />
             <button class="button reverse" @click="reverse">
-                <img src="https://api.iconify.design/bi/arrow-repeat.svg" title="Reverse" />
+                <img
+                    src="https://api.iconify.design/bi/arrow-repeat.svg"
+                    title="Reverse"
+                    alt="Reverse"
+                />
             </button>
         </div>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { ControlsProps } from '@/types';
+import { ControlsProps, OnReadyEmit } from '@/types';
 import { computed, onMounted, ref, useSlots } from 'vue';
 import { config } from '../utils';
 
 const slots = useSlots()
 
 const props = defineProps({
-    initialState: {
+    initialState: { // TODO: implement initial state
         type: Object,
         default: { paused: true },
     },
@@ -74,6 +90,14 @@ const props = defineProps({
     container: {
         type: Boolean,
         default: true,
+    },
+    pin: { // TODO: implement pinning
+        type: String,
+        default: undefined,
+    },
+    target: {
+        type: [Object, String],
+        default: undefined,
     }
 } as ControlsProps)
 
@@ -150,8 +174,9 @@ const onAnimationUpdate = (animation: gsap.core.Animation) => {
     totalTime.value = animation.totalTime()
 }
 
-const onAnimationReady = (e: gsap.core.Animation) => {
-    animation.value = e
+const onAnimationReady = (e: OnReadyEmit<gsap.core.Tween>) => {
+    console.log('ready', e)
+    animation.value = e.animation
 }
 
 onMounted(() => {
@@ -197,12 +222,12 @@ onMounted(() => {
             border-radius: 1em;
             cursor: pointer;
             .overlay-icon {
-                color: rgba(0,0,0,0.7);
+                color: rgba(0, 0, 0, 0.7);
                 width: 3em;
                 height: 3em;
                 pointer-events: none;
             }
-            &:hover{
+            &:hover {
                 .overlay-icon {
                     opacity: 0.7;
                 }

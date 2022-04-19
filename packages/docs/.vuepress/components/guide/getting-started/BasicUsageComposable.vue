@@ -1,14 +1,16 @@
 <template>
-  <div ref="helloVueSockEl">
-    Hello VueSock!
+  <div class="component">
+    <div class="box" ref="helloVueSockEl">
+      Hello VueSock!
+    </div>
+    <div class="child">child</div>
   </div>
-  <Controls : />
 </template>
 
 <script setup>
   import { useTween } from '../../../../../lib/src' // import { useTween } from 'vue-sock'
 
-  const [[ helloVueSockEl ], { Controls }] = useTween({ 
+  const [[ helloVueSockEl ]] = useTween({ 
     controls: { container: true }, // Add this for ability to control animation
     to: { x: 100, rotation: 360 },
     duration: 2
@@ -16,7 +18,7 @@
 </script>
 
 <style scoped>
-div {
+.box {
   transform: translateX(-100px) rotate(0deg);
   width: 6em;
   height: 6em;

@@ -146,7 +146,7 @@ const emit = defineEmits({
   // ready: e => e,
   // destroyed: e => e,
 } as ScrollTriggerEmits)
-// TODO: recalc scrolltrigger trigger after pinning of elements before it
+// TODO: fix tweeining triggered scrolltrigger
 gsap.registerPlugin(ScrollTrigger)
 
 const slots = useSlots()
@@ -191,7 +191,17 @@ const vars = computed<ScrollTrigger.Vars>(() => ({
   onToggle: scrollTrigger => {
     // refresh because height start changes
     scrollTrigger.refresh()
+    emit('toggle', scrollTrigger)
   },
+  onEnter: scrollTrigger => emit('enter', scrollTrigger),
+  onEnterBack: scrollTrigger => emit('enterBack', scrollTrigger),
+  onLeave: scrollTrigger => emit('leave', scrollTrigger),
+  onLeaveBack: scrollTrigger => emit('leaveBack', scrollTrigger),
+  onRefresh: scrollTrigger => emit('refresh', scrollTrigger),
+  onRefreshInit: scrollTrigger => emit('refreshInit', scrollTrigger),
+  onSnapComplete: scrollTrigger => emit('snapComplete', scrollTrigger),
+  onScrubComplete: scrollTrigger => emit('scrubComplete', scrollTrigger),
+  onUpdate: scrollTrigger => emit('update', scrollTrigger),
 }))
 
 const filteredVars = computed(() => filterOptions(vars.value))
@@ -214,6 +224,7 @@ onMounted(() => {
   // })
 
   if (slots.default && slots.default().length > 1) {
+    console.log(slots.default())
     console.warn('ScrollTrigger: Only one element is allowed')
   }
 

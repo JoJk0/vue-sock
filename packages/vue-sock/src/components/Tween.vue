@@ -283,6 +283,7 @@ onMounted(async () => {
     tween.value.eventCallback('onStart', () => emit('start', tween.value))
     tween.value.eventCallback('onUpdate', () => emit('update', tween.value))
     tween.value.eventCallback('onInterrupt', () => emit('interrupt', tween.value))
+
   }
   else {
     console.error('vue-sock: Tween: No content found')

@@ -1,0 +1,21 @@
+{
+  "folders": [
+    {
+      "name": "ROOT",
+      "path": "../"
+    },
+    {
+      "name": "VueSock",
+      "path": "../packages/vue-sock"
+    },
+    {
+      "name": "VueSock Docs",
+      "path": "../packages/docs"
+    },
+    {
+      "name": "VueSock Demo",
+      "path": "../packages/demo"
+    },
+  ],
+  "settings": {}
+}

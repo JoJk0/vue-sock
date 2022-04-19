@@ -1,4 +1,4 @@
-import { Propify } from '.'
+import { ElementTarget, Propify } from '.'
 
 export type ControlsOptions = {
     /** Initial state that the animation is supposed to start. Default `{ paused: true }` */
@@ -12,7 +12,7 @@ export type ControlsOptions = {
 
     /** Pin the controls panel on the specified place on screen. Useful for animations with multiple targets. Default `undefined` */
     pin?: ControlsOptionsPin
-}
+} & ControlsTargetOptions
 
 export type ControlsOptionsPin = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
 
@@ -27,4 +27,9 @@ export type ControlsProps = Propify<ControlsOptions>
 export type AnimationControlsOptions = {
     /** Enables play/pause, reverse and scrubbing controls over animation.  */
     controls?: ControlsOptions | boolean;
+}
+
+export type ControlsTargetOptions = {
+    /** An element or ID/classname of element that controls are wrapped on */
+    target?: ElementTarget
 }
