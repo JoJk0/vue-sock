@@ -1,6 +1,6 @@
 {
   "name": "vue-sock",
-  "version": "0.0.2-dev",
+  "version": "0.0.3-dev",
   "description": "Vue wrapper for GreenSock Animation Platform (GSAP)",
   "types": "./dist/src/index.d.ts",
   "scripts": {
