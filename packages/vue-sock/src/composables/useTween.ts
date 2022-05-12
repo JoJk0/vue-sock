@@ -1,7 +1,7 @@
 import { TweenEvents, UseTweenOptions, TweenRefs, UseTweenActions, UseTweenReturn } from '@/types';
-import { methods, warnTweenNotFound } from '../utils';
+import { attachControls, methods, warnTweenNotFound } from '../utils';
 import gsap from 'gsap'
-import { computed, ComputedRef, defineAsyncComponent, getCurrentInstance, onMounted, Ref, ref, render, toRefs } from 'vue'
+import { computed, ComputedRef, defineAsyncComponent, getCurrentInstance, onMounted, Ref, ref, render, toRefs, useSlots } from 'vue'
 import { Controls, Tween } from '..';
 import { h } from 'vue';
 
@@ -35,36 +35,16 @@ export function useTween(arg1: UseTweenOptions | typeof Tween, arg2?: HTMLElemen
     }
 
     const tween = isComponent ? (arg1 as typeof Tween).tween as Ref<gsap.core.Tween | undefined> : ref<gsap.core.Tween>()
-    
+
     const instance = getCurrentInstance()
     if (!instance) {
         console.error('VueSock: No component instance found. Make sure you are using the `useTween` hook inside setup.');
         return
     }
-    const attachControls = (el: Element | undefined) => {
-        if (!el || !el.parentElement) return;
-        
-        const controlsComponent = defineAsyncComponent(() => import("../components/Controls.vue"))
 
-        const controlsProps = typeof options.controls === 'boolean' ? {} : options.controls
 
-        const props = {
-            target: el,
-            ...controlsProps
-        }
 
-        // Find the target element IF containerized
-        // If not, pin it on screen
-
-        const controlsVNode = h(controlsComponent, props, instance.slots)
-        // instance.vnode.children = [controlsVNode]
-        // instance.vnode.children = [h('div', { class: 'bar', innerHTML: 'hello' })]
-        console.log(instance)
-        render(controlsVNode, el.parentElement)
-    }
-    
     onMounted(() => {
-        if (options.controls) attachControls(targets[0].value)
 
         if (!targets[0].value) {
             console.error('VueSock: No targets provided');
@@ -84,6 +64,8 @@ export function useTween(arg1: UseTweenOptions | typeof Tween, arg2?: HTMLElemen
         } else {
             tween.value = gsap.set(els, options)
         }
+
+        if (options.controls) attachControls({ ...(options.controls === true ? {} : options.controls), animation: tween.value })
     })
 
     const refs: TweenRefs = {

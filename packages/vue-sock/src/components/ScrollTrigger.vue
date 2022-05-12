@@ -1,21 +1,15 @@
 <template>
-  <div :class="config.scrollTriggerClassName" ref="targetsContainerEl">
-    <!-- <component v-if="vNode" :paused="true" :is="vNode" /> -->
-    <component 
-    v-if="isElementsReady" 
-    :paused="true" 
-    :scrollTrigger="filteredVars" 
-    :is="vNode" 
-    />
-  </div>
+  <!-- <component v-if="vNode" :paused="true" :is="vNode" /> -->
+  <component v-if="isElementsReady" :paused="true" :scrollTrigger="filteredVars" :is="vNode" />
 </template>
 <script lang="ts" setup>
-import { computed, getCurrentInstance, PropType, ref, watch } from 'vue'
-import { onMounted, useSlots } from 'vue'
+import { computed, getCurrentInstance, ref, onMounted, useSlots } from 'vue'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ScrollTriggerEmits, ScrollTriggerProps } from '@/types';
-import { config, filterOptions, getElementFromScopedComponent, useScopedQuerySelector } from '../utils';
+import { filterOptions, getElementFromScopedComponent } from '../utils';
+import { Tween as TweenComponent, Timeline as TimelineComponent } from '..';
+import { useScopedQuerySelector } from '../composables/useScopedQuerySelector';
 
 const props = defineProps({
   animation: {
@@ -151,11 +145,26 @@ gsap.registerPlugin(ScrollTrigger)
 
 const slots = useSlots()
 
-const instance = getCurrentInstance()
+// const instance = getCurrentInstance()
 
-const targetsContainerEl = ref<HTMLElement>()
+// const animationRef = ref<InstanceType<typeof TweenComponent> | InstanceType<typeof TimelineComponent>>()
+
+// const animation = computed(() => animationRef.value instanceof TweenComponent ? animationRef.value?.tween : animationRef.value instanceof TimelineComponent ? animationRef.value?.timeline : undefined)
+// const { animation } = useInputTargets({
+//   allowedInputTypes: {
+//     'slots': ['animation'],
+//     'props': ['animation'],
+//   },
+//   sources: {
+//     slots,
+//     props
+//   },
+//   onTargetsReady
+// })
 
 const triggerEl = useScopedQuerySelector(props.trigger)
+
+const scrollerEl = useScopedQuerySelector(props.scroller)
 
 const isElementsReady = computed(() => {
   const a = vNode && ((props.trigger && !!triggerEl.value) || !props.trigger)
@@ -187,7 +196,7 @@ const vars = computed<ScrollTrigger.Vars>(() => ({
   toggleActions: props.toggleActions,
   toggleClass: props.toggleClass,
   trigger: triggerEl.value,
-  scroller: typeof props.scroller === 'string' && instance ? getElementFromScopedComponent(props.scroller, instance) : props.scroller,
+  scroller: scrollerEl.value,
   onToggle: scrollTrigger => {
     // refresh because height start changes
     scrollTrigger.refresh()
@@ -213,10 +222,10 @@ const vNode = computed(() => {
 
 onMounted(() => {
 
-  if (!targetsContainerEl.value) {
-    console.error('ScrollTrigger: targetsContainerEl is not defined')
-    return
-  }
+  // if (!animationRef.value) {
+  //   console.error('ScrollTrigger: animationRef is not defined')
+  //   return
+  // }
 
   // scrollTrigger.value = ScrollTrigger.create({
   //   animation: ,
@@ -224,7 +233,6 @@ onMounted(() => {
   // })
 
   if (slots.default && slots.default().length > 1) {
-    console.log(slots.default())
     console.warn('ScrollTrigger: Only one element is allowed')
   }
 

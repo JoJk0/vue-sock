@@ -1,14 +1,15 @@
 <template>
-  <div :class="config.timelineClassName" ref="targetsContainerEl">
-   <component v-for="vNode of targetsVNodes" :key="vNode.toString()" :paused="true" :is="vNode" @ready="onTargetReady($event)"/>
-  </div>
+  <component v-for="vNode of targetsVNodes" :key="vNode.toString()" :paused="true" :is="vNode"
+    @ready="onTargetReady($event)" />
 </template>
 <script lang="ts" setup>
-import { computed, onUnmounted, ref } from 'vue'
+import { ComponentPublicInstance, computed, onUnmounted, ref } from 'vue'
 import { onMounted, useSlots } from 'vue'
 import gsap from 'gsap'
 import { OnReadyEmit, TimelineEmits, TimelineProps } from '@/types';
 import { config } from '../utils';
+import { useInputTargets } from '../composables/useInputTargets';
+import { Timeline, Tween } from '..';
 
 const props = defineProps({
   autoRemoveChildren: {
@@ -82,34 +83,75 @@ const emit = defineEmits({
 
 const slots = useSlots()
 
-const timeline = ref<gsap.core.Timeline>(gsap.timeline({
-      autoRemoveChildren: props.autoRemoveChildren,
-      callbackScope: props.callbackScope,
-      delay: props.delay,
-      paused: true,
-      repeat: props.repeat,
-      repeatDelay: props.repeatDelay,
-      repeatRefresh: props.repeatRefresh,
-      smoothChildTiming: props.smoothChildTiming,
-      yoyo: props.yoyo,
-      scrollTrigger: props.scrollTrigger
-    }))
+const timeline = ref<gsap.core.Timeline | undefined>(gsap.timeline({
+  autoRemoveChildren: props.autoRemoveChildren,
+  callbackScope: props.callbackScope,
+  delay: props.delay,
+  paused: true,
+  repeat: props.repeat,
+  repeatDelay: props.repeatDelay,
+  repeatRefresh: props.repeatRefresh,
+  smoothChildTiming: props.smoothChildTiming,
+  yoyo: props.yoyo,
+  scrollTrigger: props.scrollTrigger
+}))
 
 // const childrenRefs = ref<(gsap.core.Timeline | gsap.core.Tween)[]>([])
 
-const targetsVNodes = computed(() => slots.default ? slots.default() : [])
+const targetsVNodes = computed(() => slots.default ? slots.default().filter(vnode => typeof vnode.type !== "symbol") : [])
 
-const targetsContainerEl = ref<Element>()
+// const onAnimationMounted = (animationComponent: InstanceType<typeof Tween | typeof Timeline>) => {
+//   console.log(typeof animationComponent.tween)
+//   if (animationComponent.tween) {
+//     console.log(animationComponent.tween.value)
+//     animations.value.push(animationComponent.tween.value)
+//   } else if (animationComponent.timeline) {
+//     animations.value.push(animationComponent.timeline.value)
+//   } else {
+//     console.warn('[vue-sock]: Unknown animation component: ', animationComponent)
+//   }
+// }
+
+const onTargetsReady = () => {
+  if (!props.paused) timeline.value?.play()
+  if (timeline.value!.getChildren().length > 0) {
+
+    emit('ready', { el: timeline.value, position: props.position })
+
+    timeline.value?.eventCallback('onComplete', () => emit('complete', timeline.value))
+    timeline.value?.eventCallback('onRepeat', () => emit('repeat', timeline.value))
+    timeline.value?.eventCallback('onReverseComplete', () => emit('reverseComplete', timeline.value))
+    timeline.value?.eventCallback('onStart', () => emit('start', timeline.value))
+    timeline.value?.eventCallback('onUpdate', () => emit('update', timeline.value))
+    timeline.value?.eventCallback('onInterrupt', () => emit('interrupt', timeline.value))
+  }
+  else {
+    console.error('[vue-sock]: Timeline: No content found')
+  }
+}
+
+
+// const { animations } = useInputTargets({
+//   allowedInputTypes: {
+//     'slots': ['animation', 'animations'],
+//     'props': ['animation', 'animations'],
+//   },
+//   sources: {
+//     slots,
+//     props
+//   },
+//   onTargetsReady
+// })
 
 // const targets = computed(() => targetsContainerEl.value ? Array.from(targetsContainerEl.value.children).filter(el => el.className === config.tweenClassName || el.className === config.timelineClassName) : [])
 
-const onTargetReady = ({animation, position}: OnReadyEmit<gsap.core.Animation>) => {
+const onTargetReady = ({ animation, position }: OnReadyEmit<gsap.core.Animation>) => {
 
-  if(!timeline.value) return;
+  if (!timeline.value) return;
   timeline.value.add(animation.paused(false), position)
 
-  if(timeline.value.getChildren().length === targetsVNodes.value.length && !props.paused){
-    timeline.value.play()
+  if (timeline.value.getChildren().length === targetsVNodes.value.length && !props.paused) {
+    onTargetsReady()
   }
 
 }
@@ -121,28 +163,12 @@ const onTargetReady = ({animation, position}: OnReadyEmit<gsap.core.Animation>) 
 //   }
 // }
 
-defineExpose({timeline})
+defineExpose({ timeline })
 
-onMounted(() => {
-  if(!props.paused) timeline.value.play()
-  if (targetsContainerEl.value) {
 
-    emit('ready', {el: timeline.value, position: props.position})
-
-    timeline.value.eventCallback('onComplete', () => emit('complete', timeline.value))
-    timeline.value.eventCallback('onRepeat', () => emit('repeat', timeline.value))
-    timeline.value.eventCallback('onReverseComplete', () => emit('reverseComplete', timeline.value))
-    timeline.value.eventCallback('onStart', () => emit('start', timeline.value))
-    timeline.value.eventCallback('onUpdate', () => emit('update', timeline.value))
-    timeline.value.eventCallback('onInterrupt', () => emit('interrupt', timeline.value))
-  }
-  else {
-    console.error('vue-sock: Timeline: No content found')
-  }
-})
 
 onUnmounted(() => {
-  if (timeline.value){ emit('destroyed', timeline.value); timeline.value.kill(); timeline.value = undefined }
+  if (timeline.value) { emit('destroyed', timeline.value); timeline.value.kill(); timeline.value = undefined }
 })
 
 </script>

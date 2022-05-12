@@ -1,5 +1,6 @@
 import { PropType } from 'vue';
 import { EmitKeys, Propify, ScrollTriggerTweenTimelineOptions, TargetString, TimelineFunctionTarget, TimelineTarget, TweenTarget, XOR } from '.';
+import { Timeline } from '..';
 
 export type TimelineOptions = {
     /** If `autoRemoveChildren` is set to `true`, as soon as child tweens/timelines complete, they will automatically get killed/removed. This is normally undesireable because it prevents going backwards in time (like if you want to `reverse()` or set the progress lower, etc.). It can, however, improve speed and memory management. The root timelines use `autoRemoveChildren: true`. */
@@ -65,3 +66,5 @@ export type TimelineInternalEmits = {
 export type TimelineState = {
 
 }
+
+export type TimelineInstance = InstanceType<typeof Timeline>

@@ -1,28 +1,16 @@
 <template>
     <div class="controls-container" :class="[config.controlsClassName, { reversed }]">
         <div :class="{ 'animation-container': container }">
-            <component
-                :is="wraps"
-                :paused="true"
-                @ready="onAnimationReady($event)"
-                @update="onAnimationUpdate($event)"
-            ></component>
+            <component :is="wraps" :paused="true" @ready="onAnimationReady($event)" @update="onAnimationUpdate($event)">
+            </component>
             <template v-if="container">
                 <div class="overlay" v-show="completed" @click="restart">
-                    <img
-                        src="https://api.iconify.design/bi/arrow-counterclockwise.svg"
-                        class="overlay-icon"
-                        title="Restart"
-                        alt="Restart"
-                    />
+                    <img src="https://api.iconify.design/bi/arrow-counterclockwise.svg" class="overlay-icon"
+                        title="Restart" alt="Restart" />
                 </div>
                 <div class="overlay" v-show="!touched" @click="play">
-                    <img
-                        src="https://api.iconify.design/bi/play-btn.svg"
-                        class="overlay-icon"
-                        title="Play"
-                        alt="Play"
-                    />
+                    <img src="https://api.iconify.design/bi/play-btn.svg" class="overlay-icon" title="Play"
+                        alt="Play" />
                 </div>
             </template>
         </div>
@@ -34,38 +22,19 @@
                 <img src="https://api.iconify.design/bi/pause.svg" title="Pause" alt="Pause" />
             </button>
             <button v-show="completed" class="button restart" @click="restart">
-                <img
-                    v-show="!reversed"
-                    src="https://api.iconify.design/bi/arrow-counterclockwise.svg"
-                    title="Pause"
-                    alt="Pause"
-                />
-                <img
-                    v-show="reversed"
-                    src="https://api.iconify.design/bi/arrow-clockwise.svg"
-                    title="Pause"
-                    alt="Play"
-                />
+                <img v-show="!reversed" src="https://api.iconify.design/bi/arrow-counterclockwise.svg" title="Pause"
+                    alt="Pause" />
+                <img v-show="reversed" src="https://api.iconify.design/bi/arrow-clockwise.svg" title="Pause"
+                    alt="Play" />
             </button>
             <button class="button stop" @click="stop">
                 <img src="https://api.iconify.design/bi/stop.svg" title="Stop" />
             </button>
             <div class="time">{{ formattedTime }}</div>
-            <input
-                type="range"
-                @input="setTotalProgress($event)"
-                :value="totalProgress"
-                class="scrubber"
-                min="0"
-                max="1"
-                step="0.01"
-            />
+            <input type="range" @input="setTotalProgress($event)" :value="totalProgress" class="scrubber" min="0"
+                max="1" step="0.01" />
             <button class="button reverse" @click="reverse">
-                <img
-                    src="https://api.iconify.design/bi/arrow-repeat.svg"
-                    title="Reverse"
-                    alt="Reverse"
-                />
+                <img src="https://api.iconify.design/bi/arrow-repeat.svg" title="Reverse" alt="Reverse" />
             </button>
         </div>
     </div>
@@ -74,7 +43,7 @@
 <script lang="ts" setup>
 import { ControlsProps, OnReadyEmit } from '@/types';
 import { computed, onMounted, ref, useSlots } from 'vue';
-import { config } from '../utils';
+import { config, resolveAnimation } from '../utils';
 
 const slots = useSlots()
 
@@ -95,7 +64,7 @@ const props = defineProps({
         type: String,
         default: undefined,
     },
-    target: {
+    animation: {
         type: [Object, String],
         default: undefined,
     }
@@ -183,6 +152,8 @@ onMounted(() => {
     if (!slots.default) return;
     const slotEls = slots.default ? slots.default().map(slot => slot.el) : []
 
+    if (props.animation) animation.value = resolveAnimation(props.animation)
+
     slots.default().forEach(vNode => {
     });
 
@@ -208,6 +179,7 @@ onMounted(() => {
         justify-content: center;
         align-items: center;
         position: relative;
+
         .overlay {
             width: 100%;
             height: 100%;
@@ -221,12 +193,14 @@ onMounted(() => {
             align-items: center;
             border-radius: 1em;
             cursor: pointer;
+
             .overlay-icon {
                 color: rgba(0, 0, 0, 0.7);
                 width: 3em;
                 height: 3em;
                 pointer-events: none;
             }
+
             &:hover {
                 .overlay-icon {
                     opacity: 0.7;
@@ -234,11 +208,13 @@ onMounted(() => {
             }
         }
     }
+
     &.reversed {
         .overlay {
             .overlay-icon {
                 transform: rotate(180deg);
             }
+
             .controls {
                 .play {
                     transform: rotate(180deg);
@@ -247,6 +223,7 @@ onMounted(() => {
         }
     }
 }
+
 .button {
     background: transparent;
     border: 0;
@@ -260,16 +237,20 @@ onMounted(() => {
     line-height: 0;
     box-sizing: content-box;
     transition: background 0.2s ease-in-out;
+
     img {
         pointer-events: none;
     }
+
     &:hover {
         background: rgba(0, 0, 0, 0.05);
     }
+
     &:active {
         background: rgba(0, 0, 0, 0.1);
     }
 }
+
 .controls {
     background: #eeeeee;
     color: #fff;
@@ -279,12 +260,14 @@ onMounted(() => {
     box-sizing: border-box;
     border-radius: 5em;
     align-items: center;
+
     .time {
         padding: 0 1em;
         width: 2em;
         opacity: 0.7;
     }
 }
+
 .scrubber {
     outline: 0;
     border: 0;
@@ -292,6 +275,7 @@ onMounted(() => {
     border-radius: 500px;
     max-width: 100%;
     transition: box-shadow 0.2s ease-in-out;
+
     // Chrome
     @media screen and (-webkit-min-device-pixel-ratio: 0) {
         & {
@@ -300,6 +284,7 @@ onMounted(() => {
             -webkit-appearance: none;
             background-color: #ddd;
         }
+
         &::-webkit-slider-runnable-track {
             height: 40px;
             -webkit-appearance: none;
@@ -307,6 +292,7 @@ onMounted(() => {
             // margin-top: -1px;
             transition: box-shadow 0.2s ease-in-out;
         }
+
         &::-webkit-slider-thumb {
             width: 40px;
             -webkit-appearance: none;
@@ -320,23 +306,28 @@ onMounted(() => {
             position: relative;
             // top: 1px;
         }
+
         &:active::-webkit-slider-thumb {
             background: #fff;
             box-shadow: -340px 0 0 320px v-bind(color),
                 inset 0 0 0 3px v-bind(color);
         }
     }
+
     // Firefox
     &::-moz-range-progress {
         background-color: v-bind(color);
     }
+
     &::-moz-range-track {
         background-color: #9a905d;
     }
+
     // IE
     &::-ms-fill-lower {
         background-color: v-bind(color);
     }
+
     &::-ms-fill-upper {
         background-color: #9a905d;
     }
@@ -350,32 +341,40 @@ html.dark {
         .animation-container {
             .overlay {
                 background: rgba(0, 0, 0, 0.5);
+
                 .overlay-icon {
                     filter: invert(1);
                 }
             }
         }
+
         .controls {
             background: #1c1c1c;
+
             .scrubber {
                 @media screen and (-webkit-min-device-pixel-ratio: 0) {
                     & {
                         background-color: #333;
                     }
+
                     &::-webkit-slider-runnable-track {
                         color: #444;
                     }
                 }
             }
         }
+
         .button {
             color: white;
+
             &:hover {
                 background: rgba(255, 255, 255, 0.1);
             }
+
             &:active {
                 background: rgba(255, 255, 255, 0.2);
             }
+
             img {
                 filter: invert(1);
             }

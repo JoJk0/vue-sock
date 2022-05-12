@@ -29,7 +29,8 @@ export default defineConfig({
 
   // https://github.com/vitest-dev/vitest
   test: {
-    environment: 'jsdom',
+    globals: true,
+    environment: 'happy-dom',
   },
   build: {
     sourcemap: true,

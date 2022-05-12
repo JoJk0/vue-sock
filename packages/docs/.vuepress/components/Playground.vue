@@ -1,13 +1,13 @@
 <template>
-    <div class="box" ref="boxEl">Box</div>
+    <!-- <div class="box" ref="boxEl">Box</div>
     <button @click="play">play</button>
     <button @click="pause">pause</button>
     <button @click="resume">resume</button>
     <button @click="restart">restart</button>
     <button @click="reverse">reverse</button>
     <button @click="kill">kill</button>
-    <button @click="createTween">respawn</button>
-    <Playground2/>
+    <button @click="createTween">respawn</button> -->
+    <Playground2 />
 </template>
 
 <script lang="ts" setup>

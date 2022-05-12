@@ -1,17 +1,28 @@
-import { defineUserConfig } from 'vuepress'
-import type { DefaultThemeOptions } from 'vuepress'
+import { defineUserConfig, defaultTheme, viteBundler } from 'vuepress'
 import { path } from '@vuepress/utils'
+import registerComponents from '@vuepress/plugin-register-components'
+import docsearch from '@vuepress/plugin-docsearch'
 
 const resolvePath = (str: string) => path.resolve(__dirname, str)
 
-export default defineUserConfig<DefaultThemeOptions>({
+export default defineUserConfig({
     // site config
     lang: 'en-US',
     title: 'VueSock',
     description: 'A GreenSock for Vue',
 
     // theme and its config
-    theme: '@vuepress/theme-default',
+    // theme: '@vuepress/theme-default',
+
+    bundler: viteBundler({
+        viteOptions: {
+            resolve: {
+                alias: {
+                    'vue-sock': resolvePath('../../vue-sock/src'),
+                }
+            }
+        }
+    }),
     head: [
         ['link', { rel: 'icon', href: '/logo.svg' }],
         ['meta', { name: 'twitter:site', content: '@jojk0/vue-sock' }],
@@ -44,7 +55,7 @@ export default defineUserConfig<DefaultThemeOptions>({
             }
         ],
     ],
-    themeConfig: {
+    theme: defaultTheme({
         logo: '../logo.svg',
         navbar: [
             { text: 'Home', link: '/' },
@@ -89,34 +100,29 @@ export default defineUserConfig<DefaultThemeOptions>({
             ],
         },
         repo: 'jojk0/vue-sock'
-    },
+    }),
     plugins: [
-        [
-            '@vuepress/register-components',
-            {
-                componentsDir: resolvePath('./components'),
-                componentsPatterns: ['**/*.vue'],
-                components: {
-                    BasicUsageComponent: resolvePath('./components/guide/getting-started/BasicUsageComponent.vue'),
-                    BasicUsageComposable: resolvePath('./components/guide/getting-started/BasicUsageComposable.vue'),
-                    OptionsAPI: resolvePath('./components/guide/getting-started/OptionsAPI.vue'),
-                }
-            },
-        ],
-        [
-            '@vuepress/plugin-docsearch',
-            {
-                apiKey: '199061e89be8ef89092e1ec927acc2b1',
-                indexName: 'vue-sock',
-                tags: true,
-                placeholder: 'Search...',
-                display: 'fullscreen',
-                algoliaOptions: {
-                    facetFilters: [
-                        'version:vue-sock',
-                    ],
-                },
+        registerComponents({
+            componentsDir: resolvePath('./components'),
+            componentsPatterns: ['**/*.vue'],
+            components: {
+                BasicUsageComponent: resolvePath('./components/guide/getting-started/BasicUsageComponent.vue'),
+                BasicUsageComposable: resolvePath('./components/guide/getting-started/BasicUsageComposable.vue'),
+                OptionsAPI: resolvePath('./components/guide/getting-started/OptionsAPI.vue'),
             }
-        ]
+        }),
+        docsearch({
+            apiKey: '199061e89be8ef89092e1ec927acc2b1',
+            appId: 'EFPPN0SHMO',
+            indexName: 'vue-sock',
+            // tags: true,
+            placeholder: 'Search...',
+            // display: 'fullscreen',
+            // algoliaOptions: {
+            //     facetFilters: [
+            //         'version:vue-sock',
+            //     ],
+            // },
+        })
     ],
 })

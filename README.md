@@ -1,6 +1,6 @@
 <p align="center" style="margin: 4rem">
   <a href="https://github.com/" target="_blank" rel="noopener noreferrer">
-    <img width="180" src="docs/.vuepress/public/logo.svg" alt="VueSock logo">
+    <img width="180" src="packages/docs/.vuepress/public/logo.svg" alt="VueSock logo">
   </a>
   <h1 align="center">VueSock</h1>
   <h3 align="center">A GreenSock for Vue</h3>

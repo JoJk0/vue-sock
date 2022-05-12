@@ -1,4 +1,4 @@
-import { ElementTarget, Propify } from '.'
+import { AnimationTarget, ElementTarget, Propify } from '.'
 
 export type ControlsOptions = {
     /** Initial state that the animation is supposed to start. Default `{ paused: true }` */
@@ -30,6 +30,6 @@ export type AnimationControlsOptions = {
 }
 
 export type ControlsTargetOptions = {
-    /** An element or ID/classname of element that controls are wrapped on */
-    target?: ElementTarget
+    /** Animation or animation name that controls are applied to */
+    animation?: AnimationTarget
 }

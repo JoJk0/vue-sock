@@ -1,5 +1,5 @@
-import { ComponentInternalInstance, computed, getCurrentInstance, onMounted, ref, watch } from 'vue'
-import { TweenOptions, TargetString, Writeable, ElementTarget } from './types'
+import { ComponentInternalInstance, computed, defineAsyncComponent, getCurrentInstance, onMounted, ref, render, watch, h } from 'vue'
+import { TweenOptions, TargetString, Writeable, ElementTarget, AnimationTarget, ControlsOptions, PluralInputType, InputType } from './types'
 import gsap from 'gsap'
 import { ParentTypes } from './composables/useParent'
 
@@ -62,58 +62,39 @@ export const additionalProps = (tween: gsap.core.Tween) => ({
 })
 
 export const findScopeRoot: (instance: ComponentInternalInstance, scopeId?: string | null) => ComponentInternalInstance = (instance, scopeId) => {
-    const sid = scopeId || instance.vnode.scopeId
-    if (instance.parent?.vnode?.scopeId === sid) {
+    const sid = scopeId || findScopeId(instance)
+    if (instance.parent && (!instance.subTree.el || instance.subTree.scopeId !== sid)) {
         return findScopeRoot(instance.parent, sid)
-    } else if (instance.parent?.subTree.scopeId === sid) {
-        return instance.parent
     } else {
         return instance
     }
 }
 
-export const useScopedQuerySelector = (target: ElementTarget | undefined) => {
-
-    const instance = getCurrentInstance()
-
-    const scopeRoot = computed(() => instance ? findScopeRoot(instance) : null)
-
-    const el = ref<Element>()
-
-    onMounted(() => {
-        if (target instanceof Element) {
-            el.value = target
-        } else if (target) { 
-            const isTargetRootEl = (scopeRoot.value?.vnode.el as Element)?.classList.contains(target.slice(1)) || (scopeRoot.value?.vnode.el as Element)?.id === target.slice(1)
-
-            if (isTargetRootEl) {
-                el.value = scopeRoot.value?.vnode.el as Element
-            } else {
-                el.value = scopeRoot.value?.vnode.el?.querySelector(target)
-            }
-        }
-        if (target === '#splash') {
-            console.log('isElementsReady', scopeRoot.value?.vnode.el)
-            const a = instance?.parent?.parent?.vnode.el?.querySelector('#splash')
-            console.log('splash', a)
-        }
-    })
-
-    return el
+export const findScopeId: (instance: ComponentInternalInstance) => string | null = (instance: ComponentInternalInstance) => {
+    if (instance.vnode.scopeId)
+        return instance.vnode.scopeId
+    else if (instance.parent)
+        return findScopeId(instance.parent)
+    else
+        return null
 }
+
 export const getElementFromScopedComponent = (target: TargetString, instance: ComponentInternalInstance) => {
 
-    const scopeId = instance.vnode.scopeId;
-    if (!scopeId) return instance.vnode.el?.querySelector(target) as Element | undefined;
+    const scopeId = findScopeId(instance); // TODO: non-SFC scope compatibility
 
-    const scopeRoot = findScopeRoot(instance);
-    // console.log('target', target, 'scopeRoot', scopeRoot)
-    // if(target === '.left') console.log('el', scopeRoot.vnode.el)
+    const scopeRoot = findScopeRoot(instance)
 
-    return scopeRoot.vnode.el?.querySelector(target) as Element | undefined;
+    if (!scopeId) return (instance.subTree.el?.querySelector ? instance.subTree.el?.querySelector(target) : scopeRoot.subTree.el?.querySelector(target)) as Element | undefined;
+
+    if ((scopeRoot.subTree.el as Element | undefined)?.classList?.contains(target.slice(1)) || (scopeRoot.subTree.el as Element | undefined)?.id === target.slice(1)) {
+        return scopeRoot.subTree.el as Element
+    }
+
+    return scopeRoot.subTree.el?.querySelector(target) as Element | undefined;
 }
 
-export const createTween = (targets: Element[], options: TweenOptions) => {
+export const createTween = (targets: (Element | Object)[], options: TweenOptions) => {
 
     const {
         from,
@@ -239,3 +220,68 @@ export const getParentFromInstance = (instance: ComponentInternalInstance | null
 export const onIsTween = <TParent extends gsap.core.Tween | gsap.core.Animation | Element | ScrollTrigger | undefined>(parent: TParent, cb: (tween: gsap.core.Tween) => void) => {
     if (parent instanceof gsap.core.Tween) cb(parent)
 }
+
+
+/** Resolves the Animation ID string in the component. If Vue component `scopeId` is not provided, then it searches for animation globally */
+export const resolveAnimation = (animationTarget: AnimationTarget, scopeId?: string) => {
+
+    if (typeof animationTarget !== 'string') return animationTarget
+
+    const scopedId = scopeId ? `${animationTarget}-${scopeId}` : animationTarget
+
+    return gsap.getById(scopedId)
+}
+
+export const attachControls = (options: ControlsOptions) => {
+
+    const { animation: animationTarget } = options
+
+    if (!animationTarget) return;
+
+    const animation = resolveAnimation(animationTarget)
+
+    const el = (() => {
+        if (animation instanceof gsap.core.Timeline) {
+            const tween = animation.getChildren(true, true, false)[0] as gsap.core.Tween | undefined
+            return tween?.targets<Element>()[0]
+        }
+        else if (animation instanceof gsap.core.Tween) return animation.targets<Element>()[0]
+        else return undefined;
+    })()
+
+    const parent = el?.parentElement
+
+    if (!parent) return
+
+    const controlsComponent = defineAsyncComponent(() => import("./components/Controls.vue"))
+
+    // Find the target element IF containerized
+    // If not, pin it on screen
+
+    const controlsVNode = h(controlsComponent, options)
+    // instance.vnode.children = [controlsVNode]
+    // instance.vnode.children = [h('div', { class: 'bar', innerHTML: 'hello' })]
+
+    console.log('rendering', controlsVNode, parent)
+
+    render(controlsVNode, parent)
+}
+
+export const objectKeys = <T>(obj: T) => Object.keys(obj) as (keyof T)[]
+
+export const objectEntries = <T>(obj: T) => Object.entries(obj) as [keyof T, T[keyof T]][]
+
+export function arrayUnique<T>(array: T[]) {
+    let a = array.concat();
+    for (let i = 0; i < a.length; ++i) {
+        for (let j = i + 1; j < a.length; ++j) {
+            if (a[i] === a[j])
+                a.splice(j--, 1);
+        }
+    }
+
+    return a;
+}
+export const inputType: readonly InputType[] = ["target", "tween", "timeline", "animation", "label", "scrollTrigger", "controls"] as const
+
+export const pluralInputTypes: readonly PluralInputType[] = ["target", "tween", "timeline", "animation", "label"] as const

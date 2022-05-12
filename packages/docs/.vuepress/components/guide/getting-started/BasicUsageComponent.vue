@@ -7,7 +7,7 @@
 <script setup>
 import {
   Tween
-} from '../../../../../lib/src' // } from 'vue-sock'
+} from 'vue-sock'
 </script>
 
 <style scoped>

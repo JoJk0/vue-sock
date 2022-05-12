@@ -1,23 +1,23 @@
 <template>
-    <Tween :from="{ opacity: 0, xPercent: -20 }" :to="{ opacity: 1, xPercent: 0 }" :duration="2">
-      <div class="box">
-        Hello VueSock!
-      </div>
-    </Tween>
+  <Tween :from="{ opacity: 0, xPercent: -20 }" :to="{ opacity: 1, xPercent: 0 }" :duration="2">
+    <div class="box">
+      Hello VueSock!
+    </div>
+  </Tween>
 </template>
 
 <script>
-import { Tween } from '../../../../../lib/src';
+import { Tween } from 'vue-sock';
 
 export default {
-    data(){
-        return {
-            //
-        }
-    },
-    components: {
-        Tween,
+  data() {
+    return {
+      //
     }
+  },
+  components: {
+    Tween,
+  }
 };
 </script>
 

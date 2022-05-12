@@ -3,7 +3,7 @@
         <div v-if="penLink" class="pen-link" title="Edit on CodePen">
             <div class="tooltip">Edit on CodePen</div>
             <a :href="penLink" target="_blank">
-                <img src="https://api.iconify.design/ion/logo-codepen.svg" />
+                <img alt="CodePen" src="https://api.iconify.design/ion/logo-codepen.svg" />
             </a>
         </div>
         <Controls v-if="component">
@@ -16,7 +16,7 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref, useSlots } from 'vue';
 
-import { Controls } from '../../../lib/src'
+import { Controls } from 'vue-sock'
 
 const props = defineProps({
     penLink: {
@@ -63,14 +63,17 @@ const wrappedEl = computed(() => slots.default ? slots.default()[0] : null)
         opacity: 0.7;
         z-index: 9;
         transition: background-color 0.2s ease-in-out, opacity 0.2s ease-in-out;
+
         &:hover {
             opacity: 1;
             background-color: rgba(0, 0, 0, 0.05);
             width: auto;
+
             .tooltip {
                 opacity: 1;
             }
         }
+
         a {
             min-width: 2.5rem;
             min-height: 2.5rem;
@@ -78,6 +81,7 @@ const wrappedEl = computed(() => slots.default ? slots.default()[0] : null)
             margin: 0;
             margin-left: -0.5rem;
             margin-top: 0.25rem;
+
             img {
                 pointer-events: none;
                 width: 2.5rem;
@@ -86,6 +90,7 @@ const wrappedEl = computed(() => slots.default ? slots.default()[0] : null)
                 margin: 0;
             }
         }
+
         .tooltip {
             color: inherit;
             font-size: 1rem;
@@ -103,9 +108,11 @@ html.dark {
     .app-example {
         .pen-link {
             background-color: rgba(255, 255, 255, 0);
+
             &:hover {
                 background-color: rgba(255, 255, 255, 0.1);
             }
+
             img {
                 filter: invert(1);
             }

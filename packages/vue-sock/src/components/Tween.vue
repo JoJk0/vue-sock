@@ -1,15 +1,11 @@
 <template>
-  <div :class="config.tweenClassName" ref="targetsContainerEl">
-    <component v-for="vNode of targetsVNodes" :key="vNode.toString()" :is="vNode" />
-  </div>
+  <component v-for="vNode of targetsVNodes" :key="vNode.toString()" :is="vNode" :ref="onElementMounted" />
 </template>
 <script lang="ts" setup>
-import { onMounted, ref, useSlots, watch, defineExpose, computed, getCurrentInstance, onUnmounted } from 'vue'
+import { onMounted, ref, useSlots, watch, defineExpose, computed, onUnmounted, ExtractPropTypes, ComponentPublicInstance } from 'vue'
 import { TweenState, TweenEmits, TweenProps } from '@/types';
-import { getElementFromScopedComponent } from '../utils';
-import { config, createTween } from '../utils';
-import { useInputTargets } from '@/composables/useInputTargets';
-
+import { createTween } from '../utils';
+import { useInputTargets } from '../composables/useInputTargets';
 
 const props = defineProps({
   target: {
@@ -151,50 +147,83 @@ const tween = ref<gsap.core.Tween>()
 
 const targetsVNodes = computed(() => slots.default ? slots.default() : [])
 
-const targetsContainerEl = ref<Element>()
+const onElementMounted = (el: Element | ComponentPublicInstance) => {
+  if (el instanceof Element)
+    inputTargetEls.value.push(el)
+  else
+    inputTargetEls.value.push(el.$el)
+}
 
-const instance = getCurrentInstance()
+const onTargetsReady = ({ target, targets }) => {
+  // renderTargets()
 
-// const { inputTargets } = useInputTargets({
-//   allowedInputTypes: {
-//     'slots': ['target', 'targets'],
-//     'props': ['target', 'targets'],
-//   },
-//   sources: {
-//     slots,
-//     props
-//   }
-// })
+  if (targets.value && targets.value.length > 0) {
+    tween.value = createTween(targets.value, props)
+
+    if (!tween.value) {
+      console.error('vue-sock: Tween not specified')
+      return;
+    }
+
+    emit('ready', { animation: tween.value, position: props.position })
+
+    tween.value.eventCallback('onComplete', () => emit('complete', tween.value))
+    tween.value.eventCallback('onRepeat', () => emit('repeat', tween.value))
+    tween.value.eventCallback('onReverseComplete', () => emit('reverseComplete', tween.value))
+    tween.value.eventCallback('onStart', () => emit('start', tween.value))
+    tween.value.eventCallback('onUpdate', () => emit('update', tween.value))
+    tween.value.eventCallback('onInterrupt', () => emit('interrupt', tween.value))
+
+  }
+  else {
+    console.error('vue-sock: Tween: No content found')
+  }
+}
+
+const { targets: inputTargetEls } = useInputTargets({
+  allowedInputTypes: {
+    'slots': ['target', 'targets'],
+    'props': ['target', 'targets'],
+  },
+  sources: {
+    slots,
+    props: props as ExtractPropTypes<TweenProps>
+  },
+  onTargetsReady
+})
 
 // const timeline = instance?.parent?.exposed?.timeline as Ref<gsap.core.Timeline | undefined>;
 
 // const isInTimeline = computed(() => instance?.parent?.vnode?.el?.className === config.timelineClassName)
 
-const targets = computed(() => {
-  if (props.target) {
-    if (typeof props.target === 'string') {
-      if (!instance) return [];
-      const el = getElementFromScopedComponent(props.target, instance)
-      if (!el) return [];
-      return [el]
-    } else {
-      return [props.target]
-    }
-  } else if (props.targets) {
-    return props.targets.map(target => {
-      if (typeof target === 'string') {
-        if (!instance) return;
-        const el = getElementFromScopedComponent(target, instance)
-        if (!el) return;
-        return el
-      } else {
-        return target
-      }
-    }).filter(target => target !== undefined) as Element[]
-  } else {
-    return targetsContainerEl.value ? Array.from(targetsContainerEl.value.children) : []
-  }
-})
+// const targets = computed(() => {
+//   if (props.target) {
+//     if (typeof props.target === 'string') {
+//       if (!instance) return [];
+//       const el = getElementFromScopedComponent(props.target, instance)
+//       console.log(el)
+//       if (!el) return [];
+//       return [el]
+//     } else {
+//       return [props.target]
+//     }
+//   } else if (props.targets) {
+//     return props.targets.map(target => {
+//       if (typeof target === 'string') {
+//         if (!instance) return;
+//         const el = getElementFromScopedComponent(target, instance)
+//         console.log(el)
+//         if (!el) return;
+//         return el
+//       } else {
+//         return target
+//       }
+//     }).filter(target => target !== undefined) as Element[]
+//   } else {
+//     console.log(targetEls.value)
+//     return targetEls.value.length > 0 ? targetEls.value : []
+//   }
+// })
 
 const state: TweenState = {
   progress: computed({
@@ -260,35 +289,20 @@ const state: TweenState = {
   }),
 }
 
+defineExpose({ tween, targets: inputTargetEls })
 
-defineExpose({ tween, targets })
+// const renderTargets = () => {
+//   const slotTarget = slots.default ? slots.default()[0] : undefined
 
-onMounted(async () => {
-  // const slotContent = slots.default ? (slots.default()).length > 1 ? (slots.default()).map(slot => slot.el) : slots.default()[0].el : null
+//   const instance = getCurrentInstance()
 
-  if (targetsContainerEl.value) {
+//   if (!slotTarget || !instance?.parent?.vnode.el) return
 
-    tween.value = createTween(targets.value, props)
 
-    if (!tween.value) {
-      console.error('vue-sock: Tween not specified')
-      return;
-    }
+//   render(slotTarget, instance.parent.vnode.el)
+// }
 
-    emit('ready', { animation: tween.value, position: props.position })
 
-    tween.value.eventCallback('onComplete', () => emit('complete', tween.value))
-    tween.value.eventCallback('onRepeat', () => emit('repeat', tween.value))
-    tween.value.eventCallback('onReverseComplete', () => emit('reverseComplete', tween.value))
-    tween.value.eventCallback('onStart', () => emit('start', tween.value))
-    tween.value.eventCallback('onUpdate', () => emit('update', tween.value))
-    tween.value.eventCallback('onInterrupt', () => emit('interrupt', tween.value))
-
-  }
-  else {
-    console.error('vue-sock: Tween: No content found')
-  }
-})
 
 watch(() => props.paused, val => {
   if (tween.value && val !== undefined)

@@ -1,5 +1,6 @@
 import { ComputedRef, PropType, Ref, WritableComputedRef } from 'vue';
 import { ElementTarget, EmitKeys, OnReadyEmit, Propify, ScrollTriggerTweenTimelineOptions } from '.';
+import { Tween } from '..';
 import { AnimationControlsOptions } from './controls';
 import { TimelineTweenOptions } from './timeline';
 
@@ -162,3 +163,5 @@ export type TweenState = {
     // delay: WritableComputedRef<number | undefined>,
     progress?: number
 }
+
+export type TweenInstance = InstanceType<typeof Tween>

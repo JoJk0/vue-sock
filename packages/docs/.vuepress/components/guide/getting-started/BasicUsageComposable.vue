@@ -1,20 +1,22 @@
 <template>
   <div class="component">
-    <div class="box" ref="helloVueSockEl">
-      Hello VueSock!
-    </div>
+    <Controls>
+      <div class="box" ref="helloVueSockEl">
+        Hello VueSock!
+      </div>
+    </Controls>
     <div class="child">child</div>
   </div>
 </template>
 
 <script setup>
-  import { useTween } from '../../../../../lib/src' // import { useTween } from 'vue-sock'
+import { useTween } from 'vue-sock'
 
-  const [[ helloVueSockEl ]] = useTween({ 
-    controls: { container: true }, // Add this for ability to control animation
-    to: { x: 100, rotation: 360 },
-    duration: 2
-  })
+const [[helloVueSockEl], { Controls }] = useTween({
+  to: { x: 100, rotation: 360 },
+  duration: 2
+})
+
 </script>
 
 <style scoped>
